@@ -3,15 +3,14 @@ require_once __DIR__ . '/../models/MechanicModel.php';
 
 class MechanicController {
     private $model;
-    private $db;
 
     public function __construct($db) {
-        $this->db = $db;
         $this->model = new MechanicModel($db);
     }
 
-    public function dashboard($mechanic_id) {
-        $requests = $this->model->getRequests($mechanic_id);
+    // Prikaz mehaničarskog panela sa filterom
+    public function dashboard($mechanic_id, $filter = 'active') {
+        $requests = $this->model->getRequests($mechanic_id, $filter);
 
         // Statistika
         $total = count($requests);
@@ -20,23 +19,27 @@ class MechanicController {
         $scheduled = count(array_filter($requests, fn($r) => $r['status'] === 'scheduled'));
         $completed = count(array_filter($requests, fn($r) => $r['status'] === 'completed'));
 
-        // Prosleđivanje podataka view-u
         include __DIR__ . '/../views/mechanic/mechanic_dashboard.php';
     }
 
+    // Prikaz forme za odgovor
     public function showReplyForm($request_id) {
         include __DIR__ . '/../views/mechanic/reply_form.php';
     }
 
+    // Obrada odgovora na zahtev
     public function reply($request_id, $price, $date, $note) {
-        $stmt = $this->db->prepare("
-            UPDATE requests
-            SET proposed_price = ?, proposed_date = ?, note = ?, status = 'answered'
-            WHERE id = ?
-        ");
-        $stmt->execute([$price, $date, $note, $request_id]);
+        $this->model->replyToRequest($request_id, $price, $date, $note);
 
         header("Location: mechanic.php?controller=mechanic&action=dashboard&reply=success");
+        exit;
+    }
+
+    // Označavanje zahteva kao završenog
+    public function markCompleted($request_id) {
+        $this->model->markRequestCompleted($request_id);
+
+        header("Location: mechanic.php?controller=mechanic&action=dashboard&completed=1");
         exit;
     }
 }

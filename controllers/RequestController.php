@@ -24,9 +24,14 @@ class RequestController {
         include __DIR__ . '/../views/request_confirmation.php';
     }
 
-    public function myRequests($user_id) {
-    $requests = $this->model->getUserRequestsWithReplies($user_id);
-    include __DIR__ . '/../views/my_requests.php';
-}
+    public function myRequests($user_id, $filter = 'active') {
+        $requests = $this->model->getUserRequestsWithReplies($user_id, $filter);
+        include __DIR__ . '/../views/my_requests.php';
+    }
 
+    public function schedule($request_id) {
+        $this->model->scheduleRequest($request_id);
+        header("Location: /auto-servis/user.php?controller=request&action=myRequests&scheduled=1");
+        exit;
+    }
 }

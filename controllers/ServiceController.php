@@ -8,7 +8,7 @@ if (!isset($_SESSION['user'])) {
 
 $carId = $_GET['car_id'] ?? null;
 
-// ✅ Validacija car_id
+//Validacija car_id
 if (!$carId || !is_numeric($carId)) {
     echo "ID vozila nije validan.";
     exit;
@@ -16,7 +16,7 @@ if (!$carId || !is_numeric($carId)) {
 
 $services = Service::getByCar($carId);
 
-// ✅ Fallback ako nema servisa
+//Fallback ako nema servisa
 if (!$services || !is_array($services)) {
     echo "Nema dostupnih servisa za ovo vozilo.";
     exit;
