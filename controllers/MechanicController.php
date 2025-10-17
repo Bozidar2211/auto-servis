@@ -3,8 +3,10 @@ require_once __DIR__ . '/../models/MechanicModel.php';
 
 class MechanicController {
     private $model;
+    private $db;
 
     public function __construct($db) {
+        $this->db = $db;
         $this->model = new MechanicModel($db);
     }
 
@@ -27,7 +29,14 @@ class MechanicController {
     }
 
     public function reply($request_id, $price, $date, $note) {
-        $this->model->replyToRequest($request_id, $price, $date, $note);
-        header("Location: /auto-servis/mechanic.php?controller=mechanic&action=dashboard");
+        $stmt = $this->db->prepare("
+            UPDATE requests
+            SET proposed_price = ?, proposed_date = ?, note = ?, status = 'answered'
+            WHERE id = ?
+        ");
+        $stmt->execute([$price, $date, $note, $request_id]);
+
+        header("Location: mechanic.php?controller=mechanic&action=dashboard&reply=success");
+        exit;
     }
 }
