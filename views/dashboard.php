@@ -85,6 +85,8 @@ if (!isset($_SESSION['dismissed_today_reminders'])) {
         <div class="mt-4">
             <a href="add_car.php" class="btn btn-success">Dodaj automobil</a>
             <a href="upcoming_reminders.php" class="btn btn-info ms-2">Nadolazeći podsetnici</a>
+            <a href="/auto-servis/user.php?controller=request&action=showForm" class="btn btn-success">📨 Novi servisni zahtev</a>
+            <a href="/auto-servis/user.php?controller=request&action=myRequests" class="btn btn-outline-primary">📋 Moji zahtevi</a>
             <a href="logout.php" class="btn btn-outline-danger ms-2">Odjavi se</a>
         </div>
     </div>
