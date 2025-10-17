@@ -11,10 +11,11 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'mechanic') {
 
 $controller = new MechanicController($pdo);
 $action = $_GET['action'] ?? 'dashboard';
+$filter = $_GET['filter'] ?? 'active';
 
 switch ($action) {
     case 'dashboard':
-        $controller->dashboard($_SESSION['user']['id']);
+        $controller->dashboard($_SESSION['user']['id'], $filter);
         break;
 
     case 'showReplyForm':
@@ -39,6 +40,14 @@ switch ($action) {
             );
         } else {
             echo "<div class='container mt-5'><div class='alert alert-danger'>Greška: Nedostaju obavezni podaci.</div></div>";
+        }
+        break;
+
+    case 'markCompleted':
+        if (isset($_GET['id'])) {
+            $controller->markCompleted($_GET['id']);
+        } else {
+            echo "<div class='container mt-5'><div class='alert alert-danger'>Nedostaje ID zahteva.</div></div>";
         }
         break;
 
