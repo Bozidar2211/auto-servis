@@ -23,6 +23,14 @@ $users = $users ?? [];
 </header>
 
 <div class="container mt-4">
+
+    <?php if (isset($_SESSION['delete_error'])): ?>
+        <div class="alert alert-danger">
+            <?= htmlspecialchars($_SESSION['delete_error']) ?>
+        </div>
+        <?php unset($_SESSION['delete_error']); ?>
+    <?php endif; ?>
+
     <?php if (empty($users)): ?>
         <div class="alert alert-warning">Nema dostupnih korisnika.</div>
     <?php else: ?>

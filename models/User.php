@@ -64,12 +64,43 @@ class User {
         ]);
     }
 
-    public static function delete($id) {
-        if (!is_numeric($id)) {
-            return false;
-        }
-        global $pdo;
+  public static function delete($id) {
+    if (!is_numeric($id)) {
+        return false;
+    }
+
+    global $pdo;
+
+    try {
+        // 1. Obriši servise za korisnikove automobile
+        $pdo->prepare("DELETE FROM services WHERE car_id IN (SELECT id FROM cars WHERE user_id = ?)")->execute([$id]);
+
+        // 2. Obriši podsetnike za korisnikove automobile
+        $pdo->prepare("DELETE FROM reminders WHERE car_id IN (SELECT id FROM cars WHERE user_id = ?)")->execute([$id]);
+
+        // 3. Obriši modifikacije za korisnikove automobile
+        $pdo->prepare("DELETE FROM modifications WHERE car_id IN (SELECT id FROM cars WHERE user_id = ?)")->execute([$id]);
+
+        // 4. Obriši zahteve koje je korisnik poslao kao vlasnik automobila
+        $pdo->prepare("DELETE FROM requests WHERE user_id = ?")->execute([$id]);
+
+        // 5. Obriši zahteve gde je korisnik mehaničar
+        $pdo->prepare("DELETE FROM requests WHERE mechanic_id = ?")->execute([$id]);
+
+        // 6. Obriši automobile korisnika
+        $pdo->prepare("DELETE FROM cars WHERE user_id = ?")->execute([$id]);
+
+        // 7. Na kraju obriši korisnika
         $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
         return $stmt->execute([$id]);
+
+    } catch (PDOException $e) {
+        error_log("Greška pri brisanju korisnika: " . $e->getMessage());
+        return false;
     }
+}
+
+
+
+
 }

@@ -43,11 +43,18 @@ class AdminUserController {
     }
 
     public function delete() {
-        $id = $_POST['id'] ?? null;
-        if ($id && is_numeric($id)) {
-            User::delete($id);
+    $id = $_POST['id'] ?? null;
+
+    if ($id && is_numeric($id)) {
+        $success = User::delete($id);
+
+        if (!$success) {
+            $_SESSION['delete_error'] = "Korisnik ne može biti obrisan jer ima povezane podatke.";
         }
-        header('Location: /auto-servis/admin.php?controller=user&action=index');
-        exit;
     }
+
+    header('Location: /auto-servis/admin.php?controller=user&action=index');
+    exit;
+}
+
 }
