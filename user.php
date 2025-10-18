@@ -2,8 +2,10 @@
 session_start();
 require_once 'config/db.php';
 require_once 'controllers/RequestController.php';
+require_once 'models/RequestModel.php';
 
 $requestController = new RequestController($pdo);
+$requestModel = new RequestModel($pdo);
 
 $controller = $_GET['controller'] ?? '';
 $action = $_GET['action'] ?? '';
@@ -14,6 +16,7 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'user') {
     exit;
 }
 
+// Kontroler za zahteve
 if ($controller === 'request') {
     switch ($action) {
         case 'showForm':
@@ -48,6 +51,30 @@ if ($controller === 'request') {
         default:
             echo "<div class='container mt-5'><div class='alert alert-warning'>Nepoznata akcija: <strong>" . htmlspecialchars($action) . "</strong></div></div>";
     }
+
+// Kontroler za dodavanje servisa iz zahteva
+} elseif ($controller === 'service') {
+    switch ($action) {
+        case 'createFromRequest':
+            if (isset($_GET['id'])) {
+                $request = $requestModel->getRequestById($_GET['id']);
+                if ($request) {
+                    $_SESSION['prefill_request'] = $request;
+                    header("Location: views/add_service.php?car_id=" . $request['car_id']);
+                    exit;
+                } else {
+                    echo "<div class='container mt-5'><div class='alert alert-danger'>Zahtev nije pronađen.</div></div>";
+                }
+            } else {
+                echo "<div class='container mt-5'><div class='alert alert-danger'>Nedostaje ID zahteva.</div></div>";
+            }
+            break;
+
+        default:
+            echo "<div class='container mt-5'><div class='alert alert-warning'>Nepoznata akcija: <strong>" . htmlspecialchars($action) . "</strong></div></div>";
+    }
+
+// Nepoznat kontroler
 } else {
     echo "<div class='container mt-5'><div class='alert alert-warning'>Nepoznat kontroler: <strong>" . htmlspecialchars($controller) . "</strong></div></div>";
 }

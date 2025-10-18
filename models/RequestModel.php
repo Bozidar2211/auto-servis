@@ -49,4 +49,15 @@ class RequestModel {
         $stmt = $this->conn->prepare("UPDATE requests SET status = 'scheduled' WHERE id = ?");
         $stmt->execute([$request_id]);
     }
+    public function getRequestById($request_id) {
+    $stmt = $this->conn->prepare("
+        SELECT r.*, c.model AS car_model
+        FROM requests r
+        JOIN cars c ON r.car_id = c.id
+        WHERE r.id = ?
+    ");
+    $stmt->execute([$request_id]);
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
 }
