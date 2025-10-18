@@ -6,6 +6,8 @@ if (!isset($_SESSION['user'])) {
 }
 
 $carId = $_GET['car_id'] ?? null;
+$prefill = $_SESSION['prefill_request'] ?? null;
+
 if (!$carId) {
     echo "ID vozila nije prosleđen.";
     exit;
@@ -28,6 +30,12 @@ if (!$carId) {
     </header>
 
     <div class="container mt-4">
+        <?php if ($prefill): ?>
+            <div class="alert alert-info">
+                Servis se dodaje na osnovu zahteva za vozilo: <strong><?= htmlspecialchars($prefill['car_model']) ?></strong>
+            </div>
+        <?php endif; ?>
+
         <div class="card shadow-sm">
             <div class="card-body">
                 <form method="POST" action="../controllers/AddServiceController.php">
@@ -40,7 +48,7 @@ if (!$carId) {
 
                     <div class="mb-3">
                         <label for="description" class="form-label">Opis:</label>
-                        <textarea name="description" id="description" class="form-control" required></textarea>
+                        <textarea name="description" id="description" class="form-control" required><?php echo $prefill['description'] ?? ''; ?></textarea>
                     </div>
 
                     <div class="mb-3">
@@ -68,3 +76,5 @@ if (!$carId) {
     <script src="../assets/js/main.js"></script>
 </body>
 </html>
+
+<?php unset($_SESSION['prefill_request']); ?>
