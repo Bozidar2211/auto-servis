@@ -9,7 +9,6 @@ if ($_SESSION['user']['role'] === 'admin') {
     exit;
 }
 
-
 require_once __DIR__ . '/../controllers/CarController.php';
 require_once __DIR__ . '/../models/Reminder.php';
 
@@ -27,75 +26,185 @@ if (!isset($_SESSION['dismissed_today_reminders'])) {
 <html lang="hr">
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Auto Servis</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/dashboard.css">
 </head>
 <body>
-    <header class="bg-dark text-white p-3">
-        <div class="container">
-            <h1 class="h3">Dobrodošao, <?php echo htmlspecialchars($_SESSION['user']['username']); ?>!</h1>
-            <p>Email: <?php echo htmlspecialchars($_SESSION['user']['email']); ?> | Uloga: <?php echo htmlspecialchars($_SESSION['user']['role']); ?></p>
+    <!-- Animated Background -->
+    <div class="animated-bg">
+        <div class="carbon-fiber"></div>
+        <div class="gradient-overlay"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="modern-header">
+        <div class="container-fluid px-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="brand-section">
+                    <i class="fas fa-car-side brand-icon"></i>
+                    <h1 class="brand-title mb-0">Auto Servis</h1>
+                </div>
+                <div class="user-section">
+                    <div class="user-info">
+                        <div class="user-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="user-details">
+                            <span class="user-name"><?php echo htmlspecialchars($_SESSION['user']['username']); ?></span>
+                            <span class="user-email"><?php echo htmlspecialchars($_SESSION['user']['email']); ?></span>
+                        </div>
+                    </div>
+                    <a href="logout.php" class="btn-logout">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </a>
+                </div>
+            </div>
         </div>
     </header>
 
-    <div class="container mt-4">
+    <div class="container-fluid px-4 py-4">
+        <!-- Reminders Alert -->
         <?php if (!empty($remindersToday)): ?>
-            <div class="reminder-box">
-                <strong>📌 Podsetnik za danas:</strong>
-                <ul class="mt-2">
+            <div class="reminder-alert fade-in">
+                <div class="reminder-header">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-bell"></i>
+                        <h5 class="mb-0 ms-2">Podsetnici za danas</h5>
+                    </div>
+                    <form method="POST" class="d-inline">
+                        <input type="hidden" name="dismiss_all_reminders" value="1">
+                        <button type="submit" class="btn-dismiss">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </form>
+                </div>
+                <div class="reminder-list">
                     <?php foreach ($remindersToday as $reminder): ?>
-                        <li>
-                            <?php echo htmlspecialchars($reminder['brand'] . ' ' . $reminder['model'] . ': ' . $reminder['note']); ?>
+                        <div class="reminder-item">
+                            <div class="reminder-content">
+                                <i class="fas fa-calendar-check"></i>
+                                <span><?php echo htmlspecialchars($reminder['brand'] . ' ' . $reminder['model'] . ': ' . $reminder['note']); ?></span>
+                            </div>
                             <form method="POST" action="../controllers/DeleteController.php" class="d-inline" data-confirm="Da li ste sigurni da želite da obrišete ovaj podsetnik?">
                                 <input type="hidden" name="type" value="reminder">
                                 <input type="hidden" name="id" value="<?php echo $reminder['id']; ?>">
-                                <button type="submit" class="btn btn-sm btn-danger ms-2">Obriši</button>
+                                <button type="submit" class="btn-remove">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
                             </form>
-                        </li>
+                        </div>
                     <?php endforeach; ?>
-                </ul>
-                <form method="POST" class="mt-2">
-                    <input type="hidden" name="dismiss_all_reminders" value="1">
-                    <button type="submit" class="btn btn-warning">U redu</button>
-                </form>
+                </div>
             </div>
         <?php endif; ?>
 
-        <h3 class="mt-4">Moji automobili:</h3>
-        <?php if (empty($cars)): ?>
-            <p>Nemate registrovanih automobila.</p>
-        <?php else: ?>
-            <ul class="list-group">
-                <?php foreach ($cars as $car): ?>
-                    <li class="list-group-item">
-                        <strong><?php echo htmlspecialchars($car['brand'] . ' ' . $car['model'] . ' (' . $car['year'] . ') - ' . $car['registration']); ?></strong><br>
-                        <a href="services.php?car_id=<?php echo $car['id']; ?>">Servisi</a> |
-                        <a href="add_service.php?car_id=<?php echo $car['id']; ?>">Dodaj servis</a> |
-                        <a href="modifications.php?car_id=<?php echo $car['id']; ?>">Modifikacije</a> |
-                        <a href="add_modification.php?car_id=<?php echo $car['id']; ?>">Dodaj modifikaciju</a> |
-                        <a href="stats.php?car_id=<?php echo $car['id']; ?>">Statistika</a> |
-                        <a href="reminders.php?car_id=<?php echo $car['id']; ?>">Pregled podsetnika</a> |
-                        <a href="add_reminder.php?car_id=<?php echo $car['id']; ?>">Dodaj podsetnik</a>
-                    </li>
-                <?php endforeach; ?>
-            </ul>
-        <?php endif; ?>
-
-        <div class="mt-4">
-            <a href="add_car.php" class="btn btn-success">Dodaj automobil</a>
-            <a href="upcoming_reminders.php" class="btn btn-info ms-2">Nadolazeći podsetnici</a>
-            <a href="/auto-servis/user.php?controller=request&action=showForm" class="btn btn-success">📨 Novi servisni zahtev</a>
-            <a href="/auto-servis/user.php?controller=request&action=myRequests" class="btn btn-outline-primary">📋 Moji zahtevi</a>
-            <a href="logout.php" class="btn btn-outline-danger ms-2">Odjavi se</a>
+        <!-- Quick Actions -->
+        <div class="quick-actions fade-in" style="animation-delay: 0.1s;">
+            <a href="add_car.php" class="action-card">
+                <div class="action-icon">
+                    <i class="fas fa-plus-circle"></i>
+                </div>
+                <div class="action-content">
+                    <h6>Dodaj vozilo</h6>
+                    <p>Registruj novo vozilo</p>
+                </div>
+            </a>
+            <a href="/auto-servis/user.php?controller=request&action=showForm" class="action-card">
+                <div class="action-icon">
+                    <i class="fas fa-paper-plane"></i>
+                </div>
+                <div class="action-content">
+                    <h6>Servisni zahtev</h6>
+                    <p>Pošalji novi zahtev</p>
+                </div>
+            </a>
+            <a href="/auto-servis/user.php?controller=request&action=myRequests" class="action-card">
+                <div class="action-icon">
+                    <i class="fas fa-clipboard-list"></i>
+                </div>
+                <div class="action-content">
+                    <h6>Moji zahtevi</h6>
+                    <p>Pregled zahteva</p>
+                </div>
+            </a>
+            <a href="upcoming_reminders.php" class="action-card">
+                <div class="action-icon">
+                    <i class="fas fa-bell"></i>
+                </div>
+                <div class="action-content">
+                    <h6>Podsetnici</h6>
+                    <p>Nadolazeći događaji</p>
+                </div>
+            </a>
         </div>
+
+        <!-- Cars Section -->
+        <div class="section-header fade-in" style="animation-delay: 0.2s;">
+            <h3><i class="fas fa-car me-2"></i>Moja vozila</h3>
+        </div>
+
+        <?php if (empty($cars)): ?>
+            <div class="empty-state fade-in" style="animation-delay: 0.3s;">
+                <i class="fas fa-car-side"></i>
+                <h4>Nemate registrovanih vozila</h4>
+                <p>Dodajte svoje prvo vozilo da biste počeli sa praćenjem servisa</p>
+                <a href="add_car.php" class="btn-primary-custom">
+                    <i class="fas fa-plus me-2"></i>Dodaj prvo vozilo
+                </a>
+            </div>
+        <?php else: ?>
+            <div class="cars-grid">
+                <?php foreach ($cars as $index => $car): ?>
+                    <div class="car-card fade-in" style="animation-delay: <?php echo 0.3 + ($index * 0.1); ?>s;">
+                        <div class="car-header">
+                            <div class="car-icon">
+                                <i class="fas fa-car"></i>
+                            </div>
+                            <div class="car-info">
+                                <h5><?php echo htmlspecialchars($car['brand'] . ' ' . $car['model']); ?></h5>
+                                <p class="car-meta"><?php echo htmlspecialchars($car['year'] . ' • ' . $car['registration']); ?></p>
+                            </div>
+                        </div>
+                        <div class="car-actions">
+                            <a href="services.php?car_id=<?php echo $car['id']; ?>" class="action-btn" title="Servisi">
+                                <i class="fas fa-wrench"></i>
+                                <span>Servisi</span>
+                            </a>
+                            <a href="add_service.php?car_id=<?php echo $car['id']; ?>" class="action-btn" title="Dodaj servis">
+                                <i class="fas fa-plus"></i>
+                                <span>Dodaj</span>
+                            </a>
+                            <a href="modifications.php?car_id=<?php echo $car['id']; ?>" class="action-btn" title="Modifikacije">
+                                <i class="fas fa-cogs"></i>
+                                <span>Mods</span>
+                            </a>
+                            <a href="stats.php?car_id=<?php echo $car['id']; ?>" class="action-btn" title="Statistika">
+                                <i class="fas fa-chart-line"></i>
+                                <span>Stats</span>
+                            </a>
+                            <a href="reminders.php?car_id=<?php echo $car['id']; ?>" class="action-btn" title="Podsetnici">
+                                <i class="fas fa-bell"></i>
+                                <span>Podsetnici</span>
+                            </a>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
     </div>
 
-    <footer class="bg-light text-center p-3 mt-5">
-        &copy; <?php echo date('Y'); ?> Božidar AutoApp
+    <footer class="modern-footer">
+        <div class="container text-center">
+            <p class="mb-0">&copy; <?php echo date('Y'); ?> Božidar AutoApp • Sva prava zadržana</p>
+        </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../assets/js/main.js"></script>
+    <script src="../assets/js/dashboard.js"></script>
 </body>
 </html>

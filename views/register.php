@@ -46,7 +46,7 @@
     <p class="mt-3">Već imate nalog? <a href="login.php">Prijavite se</a></p>
 </div>
 
-<footer class="bg-light text-center p-3 mt-5">
+<footer class="text-center mt-5 py-3">
     &copy; <?php echo date('Y'); ?> Božidar AutoApp
 </footer>
 
