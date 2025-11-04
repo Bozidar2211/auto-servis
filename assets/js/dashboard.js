@@ -321,4 +321,41 @@ document.addEventListener('DOMContentLoaded', () => {
     // ========== CONSOLE EASTER EGG ==========
     console.log('%c🚗 Auto Servis Dashboard', 'font-size: 20px; font-weight: bold; color: #f0ad4e;');
     console.log('%cKeyboard shortcuts:\nAlt + N: Dodaj vozilo\nAlt + R: Novi zahtev', 'color: #888;');
+    
+    // ========== CAR SEARCH/FILTER ==========
+    window.filterCars = function(query) {
+        const cars = document.querySelectorAll('.car-card');
+        const lowerQuery = query.toLowerCase();
+        
+        cars.forEach(card => {
+            const carInfo = card.querySelector('.car-info h5').textContent.toLowerCase();
+            const carMeta = card.querySelector('.car-meta').textContent.toLowerCase();
+            
+            if (carInfo.includes(lowerQuery) || carMeta.includes(lowerQuery)) {
+                card.style.display = 'block';
+                card.style.animation = 'fadeIn 0.5s ease-out';
+            } else {
+                card.style.opacity = '0';
+                setTimeout(() => {
+                    card.style.display = 'none';
+                }, 300);
+            }
+        });
+    };
+    
+    // ========== WELCOME BANNER ANIMATION ==========
+    const welcomeBanner = document.querySelector('.welcome-banner');
+    if (welcomeBanner) {
+        welcomeBanner.style.animation = 'slideInDown 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+    }
+    
+    // ========== STAT NUMBERS ANIMATION ==========
+    document.querySelectorAll('.stat-number').forEach(stat => {
+        const target = parseInt(stat.textContent);
+        if (!isNaN(target)) {
+            stat.textContent = '0';
+            animateCounter(stat, target, 1500);
+        }
+    });
+
 });

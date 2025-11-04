@@ -136,7 +136,7 @@
         <div class="feature-bg" style="background-image: url('https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=800&q=80');"></div>
         <div class="feature-content">
           <i class="fas fa-cogs feature-icon"></i>
-          <h3 class="feature-title">Tuning & Modifikacije</h3>
+          <h3 class="feature-title">Tuning i Modifikacije</h3>
           <p class="feature-desc">Evidentirajte sve modifikacije, performanse i unapređenja vašeg vozila sa detaljnom dokumentacijom.</p>
         </div>
       </div>
@@ -156,7 +156,7 @@
         <div class="feature-bg" style="background-image: url('https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80');"></div>
         <div class="feature-content">
           <i class="fas fa-chart-line feature-icon"></i>
-          <h3 class="feature-title">Analitika & Statistika</h3>
+          <h3 class="feature-title">Analitika i Statistika</h3>
           <p class="feature-desc">Detaljni grafikoni troškova, pređene kilometraže i kompletna statistika održavanja vašeg vozila.</p>
         </div>
       </div>
@@ -166,7 +166,7 @@
         <div class="feature-bg" style="background-image: url('https://images.unsplash.com/photo-1581092921461-eab62e97a780?w=800&q=80');"></div>
         <div class="feature-content">
           <i class="fas fa-users feature-icon"></i>
-          <h3 class="feature-title">Proveren Stručnjaci</h3>
+          <h3 class="feature-title">Provereni Stručnjaci</h3>
           <p class="feature-desc">Pristup mreži sertifikovanih mehaničara i ovlašćenih servisa sa garantovanim kvalitetom usluga.</p>
         </div>
       </div>

@@ -12,6 +12,9 @@ if ($_SESSION['user']['role'] === 'admin') {
 require_once __DIR__ . '/../controllers/CarController.php';
 require_once __DIR__ . '/../models/Reminder.php';
 
+// Učitaj automobile korisnika
+$cars = Car::getByUser($_SESSION['user']['id']);
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['dismiss_all_reminders'])) {
     $_SESSION['dismissed_today_reminders'] = true;
 }
@@ -67,6 +70,30 @@ if (!isset($_SESSION['dismissed_today_reminders'])) {
     </header>
 
     <div class="container-fluid px-4 py-4">
+        <!-- Welcome Banner -->
+        <div class="welcome-banner fade-in">
+            <div class="welcome-content">
+                <h2>Dobrodošao nazad, <?php echo htmlspecialchars($_SESSION['user']['username']); ?>! 👋</h2>
+                <p>Evo pregleda tvojih vozila i aktivnosti</p>
+            </div>
+            <div class="welcome-stats">
+                <div class="stat-badge">
+                    <i class="fas fa-car"></i>
+                    <div>
+                        <span class="stat-number"><?php echo count($cars); ?></span>
+                        <span class="stat-label">Vozila</span>
+                    </div>
+                </div>
+                <div class="stat-badge">
+                    <i class="fas fa-bell"></i>
+                    <div>
+                        <span class="stat-number"><?php echo count($remindersToday); ?></span>
+                        <span class="stat-label">Podsetnika</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Reminders Alert -->
         <?php if (!empty($remindersToday)): ?>
             <div class="reminder-alert fade-in">
