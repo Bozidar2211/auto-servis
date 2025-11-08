@@ -347,6 +347,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const welcomeBanner = document.querySelector('.welcome-banner');
     if (welcomeBanner) {
         welcomeBanner.style.animation = 'slideInDown 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+        welcomeBanner.style.animationFillMode = 'forwards';
     }
     
     // ========== STAT NUMBERS ANIMATION ==========

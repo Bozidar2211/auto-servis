@@ -13,7 +13,9 @@ $costs = $costs ?? [];
     <meta charset="UTF-8">
     <title>Troškovi po korisniku</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/auto-servis/assets/css/style.css">
+    <link rel="stylesheet" href="/auto-servis/assets/css/dashboard.css">
 </head>
 <body>
 <header class="bg-dark text-white p-3">
@@ -52,6 +54,7 @@ $costs = $costs ?? [];
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="../../assets/js/main.js"></script>
+<script src="/auto-servis/assets/js/main.js"></script>
+    <script src="/auto-servis/assets/js/dashboard.js"></script>
 </body>
 </html>
