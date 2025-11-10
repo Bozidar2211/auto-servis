@@ -2,6 +2,10 @@
 require_once __DIR__ . '/../config/db.php';
 
 class User {
+    public static function availableRoles() {
+        return ['user', 'mechanic', 'admin'];
+    }
+
     public static function findByEmail($email) {
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return false;
@@ -17,7 +21,7 @@ class User {
             empty($username) ||
             !filter_var($email, FILTER_VALIDATE_EMAIL) ||
             strlen($password) < 6 ||
-            !in_array($role, ['user', 'admin'])
+            !in_array($role, self::availableRoles())
         ) {
             return false;
         }
@@ -48,7 +52,7 @@ class User {
         if (
             empty($data['username']) ||
             !filter_var($data['email'], FILTER_VALIDATE_EMAIL) ||
-            !in_array($data['role'], ['user', 'admin']) ||
+            !in_array($data['role'], self::availableRoles()) ||
             !is_numeric($data['id'])
         ) {
             return false;
@@ -64,43 +68,27 @@ class User {
         ]);
     }
 
-  public static function delete($id) {
-    if (!is_numeric($id)) {
-        return false;
+    public static function delete($id) {
+        if (!is_numeric($id)) {
+            return false;
+        }
+
+        global $pdo;
+
+        try {
+            $pdo->prepare("DELETE FROM services WHERE car_id IN (SELECT id FROM cars WHERE user_id = ?)")->execute([$id]);
+            $pdo->prepare("DELETE FROM reminders WHERE car_id IN (SELECT id FROM cars WHERE user_id = ?)")->execute([$id]);
+            $pdo->prepare("DELETE FROM modifications WHERE car_id IN (SELECT id FROM cars WHERE user_id = ?)")->execute([$id]);
+            $pdo->prepare("DELETE FROM requests WHERE user_id = ?")->execute([$id]);
+            $pdo->prepare("DELETE FROM requests WHERE mechanic_id = ?")->execute([$id]);
+            $pdo->prepare("DELETE FROM cars WHERE user_id = ?")->execute([$id]);
+
+            $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
+            return $stmt->execute([$id]);
+
+        } catch (PDOException $e) {
+            error_log("Greška pri brisanju korisnika: " . $e->getMessage());
+            return false;
+        }
     }
-
-    global $pdo;
-
-    try {
-        // 1. Obriši servise za korisnikove automobile
-        $pdo->prepare("DELETE FROM services WHERE car_id IN (SELECT id FROM cars WHERE user_id = ?)")->execute([$id]);
-
-        // 2. Obriši podsetnike za korisnikove automobile
-        $pdo->prepare("DELETE FROM reminders WHERE car_id IN (SELECT id FROM cars WHERE user_id = ?)")->execute([$id]);
-
-        // 3. Obriši modifikacije za korisnikove automobile
-        $pdo->prepare("DELETE FROM modifications WHERE car_id IN (SELECT id FROM cars WHERE user_id = ?)")->execute([$id]);
-
-        // 4. Obriši zahteve koje je korisnik poslao kao vlasnik automobila
-        $pdo->prepare("DELETE FROM requests WHERE user_id = ?")->execute([$id]);
-
-        // 5. Obriši zahteve gde je korisnik mehaničar
-        $pdo->prepare("DELETE FROM requests WHERE mechanic_id = ?")->execute([$id]);
-
-        // 6. Obriši automobile korisnika
-        $pdo->prepare("DELETE FROM cars WHERE user_id = ?")->execute([$id]);
-
-        // 7. Na kraju obriši korisnika
-        $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
-        return $stmt->execute([$id]);
-
-    } catch (PDOException $e) {
-        error_log("Greška pri brisanju korisnika: " . $e->getMessage());
-        return false;
-    }
-}
-
-
-
-
 }

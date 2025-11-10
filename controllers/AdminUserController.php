@@ -24,7 +24,8 @@ class AdminUserController {
             exit;
         }
 
-        $roles = ['user', 'admin'];
+        // ✅ koristi helper iz modela
+        $roles = User::availableRoles();
         include __DIR__ . '/../views/admin/edit_user.php';
     }
 
@@ -34,7 +35,7 @@ class AdminUserController {
             !empty($data['id']) && is_numeric($data['id']) &&
             !empty($data['username']) &&
             filter_var($data['email'], FILTER_VALIDATE_EMAIL) &&
-            in_array($data['role'], ['user', 'admin'])
+            in_array($data['role'], User::availableRoles()) // ✅ koristi sve dozvoljene role
         ) {
             User::update($data);
         }
@@ -43,18 +44,17 @@ class AdminUserController {
     }
 
     public function delete() {
-    $id = $_POST['id'] ?? null;
+        $id = $_POST['id'] ?? null;
 
-    if ($id && is_numeric($id)) {
-        $success = User::delete($id);
+        if ($id && is_numeric($id)) {
+            $success = User::delete($id);
 
-        if (!$success) {
-            $_SESSION['delete_error'] = "Korisnik ne može biti obrisan jer ima povezane podatke.";
+            if (!$success) {
+                $_SESSION['delete_error'] = "Korisnik ne može biti obrisan jer ima povezane podatke.";
+            }
         }
+
+        header('Location: /auto-servis/admin.php?controller=user&action=index');
+        exit;
     }
-
-    header('Location: /auto-servis/admin.php?controller=user&action=index');
-    exit;
-}
-
 }
