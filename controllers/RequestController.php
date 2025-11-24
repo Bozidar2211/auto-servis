@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../models/RequestModel.php';
 
 class RequestController {
@@ -20,9 +21,10 @@ class RequestController {
         exit;
     }
 
-    public function confirmation() {
-        include __DIR__ . '/../views/request_confirmation.php';
-    }
+   public function confirmation() {
+    include __DIR__ . '/../views/request_confirmation.php';
+}
+
 
     public function myRequests($user_id, $filter = 'active') {
         $requests = $this->model->getUserRequestsWithReplies($user_id, $filter);
@@ -35,3 +37,4 @@ class RequestController {
         exit;
     }
 }
+

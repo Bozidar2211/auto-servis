@@ -26,24 +26,28 @@ class RequestModel {
     }
 
     public function getUserRequestsWithReplies($user_id, $filter = 'active') {
-        $query = "
-            SELECT r.*, u.username AS mechanic_name, c.model AS car_model
-            FROM requests r
-            JOIN users u ON r.mechanic_id = u.id
-            JOIN cars c ON r.car_id = c.id
-            WHERE r.user_id = ?
-        ";
+    $query = "
+        SELECT r.*, 
+               u.username AS mechanic_name, 
+               c.model AS car_model, 
+               c.brand AS car_brand
+        FROM requests r
+        JOIN users u ON r.mechanic_id = u.id
+        JOIN cars c ON r.car_id = c.id
+        WHERE r.user_id = ?
+    ";
 
-        if ($filter === 'active') {
-            $query .= " AND r.status IN ('pending', 'answered', 'scheduled')";
-        }
-
-        $query .= " ORDER BY r.created_at DESC";
-
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute([$user_id]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    if ($filter === 'active') {
+        $query .= " AND r.status IN ('pending', 'answered', 'scheduled')";
     }
+
+    $query .= " ORDER BY r.created_at DESC";
+
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute([$user_id]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
 
     public function scheduleRequest($request_id) {
         $stmt = $this->conn->prepare("UPDATE requests SET status = 'scheduled' WHERE id = ?");
