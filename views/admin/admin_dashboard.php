@@ -3,6 +3,19 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
     header('Location: ../dashboard.php');
     exit;
 }
+require_once __DIR__ . '/../../models/Report.php';
+
+//podaci iz baze
+$stats = Report::getSystemStats();
+
+//prihod
+global $pdo;
+$serviceRevenue = $pdo->query("SELECT COALESCE(SUM(cost), 0) FROM services")->fetchColumn();
+$modRevenue = $pdo->query("SELECT COALESCE(SUM(total_cost), 0) FROM modifications")->fetchColumn();
+$totalRevenue = $serviceRevenue + $modRevenue;
+
+// Ukupan rad (servisi + modifikacije)
+$totalWork = $stats['service_count'] + $stats['mod_count'];
 ?>
 
 <!DOCTYPE html>
@@ -66,36 +79,36 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
         </div>
 
         <!-- Quick Stats -->
-        <div class="quick-stats fade-in" style="animation-delay: 0.1s;">
-            <div class="stat-mini stat-users">
-                <i class="fas fa-users"></i>
-                <div>
-                    <span class="stat-mini-number">--</span>
-                    <span class="stat-mini-label">Korisnici</span>
-                </div>
-            </div>
-            <div class="stat-mini stat-cars">
-                <i class="fas fa-car"></i>
-                <div>
-                    <span class="stat-mini-number">--</span>
-                    <span class="stat-mini-label">Vozila</span>
-                </div>
-            </div>
-            <div class="stat-mini stat-services">
-                <i class="fas fa-wrench"></i>
-                <div>
-                    <span class="stat-mini-number">--</span>
-                    <span class="stat-mini-label">Servisi</span>
-                </div>
-            </div>
-            <div class="stat-mini stat-revenue">
-                <i class="fas fa-dollar-sign"></i>
-                <div>
-                    <span class="stat-mini-number">--</span>
-                    <span class="stat-mini-label">Prihod</span>
-                </div>
-            </div>
+<div class="quick-stats fade-in" style="animation-delay: 0.1s;">
+    <div class="stat-mini stat-users">
+        <i class="fas fa-users"></i>
+        <div>
+            <span class="stat-mini-number"><?php echo $stats['user_count']; ?></span>
+            <span class="stat-mini-label">Korisnici</span>
         </div>
+    </div>
+    <div class="stat-mini stat-cars">
+        <i class="fas fa-car"></i>
+        <div>
+            <span class="stat-mini-number"><?php echo $stats['car_count']; ?></span>
+            <span class="stat-mini-label">Vozila</span>
+        </div>
+    </div>
+    <div class="stat-mini stat-services">
+        <i class="fas fa-wrench"></i>
+        <div>
+            <span class="stat-mini-number"><?php echo $totalWork; ?></span>
+            <span class="stat-mini-label">Ukupno radova</span>
+        </div>
+    </div>
+    <div class="stat-mini stat-revenue">
+        <i class="fas fa-dollar-sign"></i>
+        <div>
+            <span class="stat-mini-number"><?php echo number_format($totalRevenue, 0, ',', '.'); ?> RSD</span>
+            <span class="stat-mini-label">Prihod</span>
+        </div>
+    </div>
+</div>
 
         <!-- Admin Actions Grid -->
         <div class="admin-grid fade-in" style="animation-delay: 0.2s;">
@@ -193,55 +206,7 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
                         <i class="fas fa-list-ol me-2"></i>Top Servisi
                     </a>
                 </div>
-            </div>
-
-            <!-- Card 5: System Settings (Bonus) -->
-            <div class="admin-card admin-card-secondary">
-                <div class="admin-card-header">
-                    <div class="admin-card-icon">
-                        <i class="fas fa-cog"></i>
-                    </div>
-                    <div class="admin-card-badge">Sistem</div>
-                </div>
-                <div class="admin-card-body">
-                    <h3 class="admin-card-title">Sistemske Postavke</h3>
-                    <p class="admin-card-desc">Konfiguracija sistema, backup, logovi i sigurnost</p>
-                    <ul class="admin-card-features">
-                        <li><i class="fas fa-check"></i>Backup baze</li>
-                        <li><i class="fas fa-check"></i>System logs</li>
-                        <li><i class="fas fa-check"></i>Sigurnosne opcije</li>
-                    </ul>
-                </div>
-                <div class="admin-card-footer">
-                    <a href="#" class="btn-admin btn-admin-secondary" onclick="alert('Uskoro dostupno!'); return false;">
-                        <i class="fas fa-cogs me-2"></i>Postavke
-                    </a>
-                </div>
-            </div>
-
-            <!-- Card 6: Activity Log (Bonus) -->
-            <div class="admin-card admin-card-danger">
-                <div class="admin-card-header">
-                    <div class="admin-card-icon">
-                        <i class="fas fa-history"></i>
-                    </div>
-                    <div class="admin-card-badge">Recent</div>
-                </div>
-                <div class="admin-card-body">
-                    <h3 class="admin-card-title">Log Aktivnosti</h3>
-                    <p class="admin-card-desc">Praćenje svih aktivnosti korisnika i sistema u realnom vremenu</p>
-                    <ul class="admin-card-features">
-                        <li><i class="fas fa-check"></i>Login istorija</li>
-                        <li><i class="fas fa-check"></i>Izmene podataka</li>
-                        <li><i class="fas fa-check"></i>Sigurnosni eventi</li>
-                    </ul>
-                </div>
-                <div class="admin-card-footer">
-                    <a href="#" class="btn-admin btn-admin-danger" onclick="alert('Uskoro dostupno!'); return false;">
-                        <i class="fas fa-file-alt me-2"></i>Pregled Logova
-                    </a>
-                </div>
-            </div>
+            </div>  
         </div>
 
         <!-- Quick Access Bar -->

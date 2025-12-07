@@ -15,6 +15,7 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'mechanic') {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/auto-servis/assets/css/style.css">
     <link rel="stylesheet" href="/auto-servis/assets/css/mechanic.css">
+    <link rel="stylesheet" href="/auto-servis/assets/css/mechanic_header.css">
 </head>
 <body>
     <!-- Animated Background -->
@@ -120,7 +121,7 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'mechanic') {
                     </a>
                     <a href="/auto-servis/mechanic.php?controller=mechanic&action=dashboard&filter=all" 
                        class="btn-filter <?= ($_GET['filter'] ?? 'active') === 'all' ? 'active' : '' ?>">
-                        <i class="fas fa-list me-1"></i>Svi
+                        Svi
                     </a>
                     <button class="btn-refresh" onclick="location.reload()">
                         <i class="fas fa-sync-alt"></i>

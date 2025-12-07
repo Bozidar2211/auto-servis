@@ -1,0 +1,530 @@
+document.addEventListener('DOMContentLoaded', () => {
+
+    // ========== INITIALIZE COUNTERS ==========
+    const reminderCards = document.querySelectorAll('.reminder-card');
+    
+    let activeCount = 0;
+    let completedCount = 0;
+    let overdueCount = 0;
+    
+    reminderCards.forEach(card => {
+        const status = card.getAttribute('data-status');
+        const isOverdue = card.getAttribute('data-overdue') === 'true';
+        
+        if (status === 'active') {
+            activeCount++;
+            if (isOverdue) {
+                overdueCount++;
+            }
+        } else if (status === 'completed') {
+            completedCount++;
+        }
+    });
+    
+    // Animate counters
+    animateCounter(document.getElementById('activeCount'), activeCount);
+    animateCounter(document.getElementById('completedCount'), completedCount);
+    animateCounter(document.getElementById('overdueCount'), overdueCount);
+    animateCounter(document.getElementById('totalCount'), reminderCards.length);
+
+    function animateCounter(element, target, duration = 800) {
+        if (!element) return;
+        
+        let start = 0;
+        const increment = target / (duration / 16);
+        
+        const timer = setInterval(() => {
+            start += increment;
+            if (start >= target) {
+                element.textContent = target;
+                clearInterval(timer);
+            } else {
+                element.textContent = Math.floor(start);
+            }
+        }, 16);
+    }
+
+    // ========== SCROLL TO TOP BUTTON ==========
+    const scrollTopBtn = document.getElementById('scrollTop');
+    
+    if (scrollTopBtn) {
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                scrollTopBtn.classList.add('visible');
+            } else {
+                scrollTopBtn.classList.remove('visible');
+            }
+        });
+
+        scrollTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    }
+
+    // ========== NAVBAR SCROLL EFFECT ==========
+    const navbar = document.querySelector('.navbar');
+    
+    window.addEventListener('scroll', () => {
+        if (window.pageYOffset > 50) {
+            navbar.style.boxShadow = '0 8px 30px rgba(0, 0, 0, 0.8)';
+        } else {
+            navbar.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.5)';
+        }
+    });
+
+    // ========== FILTER & SEARCH ELEMENTS ==========
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const searchInput = document.getElementById('searchInput');
+    const clearSearchBtn = document.getElementById('clearSearch');
+    const remindersGrid = document.getElementById('remindersGrid');
+
+    let currentFilter = 'all';
+    let currentSearch = '';
+
+    // ========== FILTER FUNCTIONALITY ==========
+    filterButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Update active button
+            filterButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            currentFilter = btn.dataset.filter;
+            applyFiltersAndSearch();
+        });
+    });
+
+    // ========== SEARCH FUNCTIONALITY ==========
+    searchInput?.addEventListener('input', (e) => {
+        currentSearch = e.target.value.toLowerCase();
+        
+        // Show/hide clear button
+        if (currentSearch) {
+            clearSearchBtn.classList.add('active');
+        } else {
+            clearSearchBtn.classList.remove('active');
+        }
+        
+        applyFiltersAndSearch();
+    });
+
+    clearSearchBtn?.addEventListener('click', () => {
+        searchInput.value = '';
+        currentSearch = '';
+        clearSearchBtn.classList.remove('active');
+        applyFiltersAndSearch();
+        searchInput.focus();
+    });
+
+    // ========== APPLY FILTERS AND SEARCH ==========
+    function applyFiltersAndSearch() {
+        let visibleCount = 0;
+        let filteredCounts = {
+            active: 0,
+            completed: 0,
+            overdue: 0
+        };
+
+        reminderCards.forEach(card => {
+            const status = card.dataset.status;
+            const isOverdue = card.getAttribute('data-overdue') === 'true';
+            const title = card.querySelector('.reminder-title').textContent.toLowerCase();
+            const vehicle = card.querySelector('.info-value').textContent.toLowerCase();
+            const description = card.querySelector('.description-preview').textContent.toLowerCase();
+            
+            // Check filter
+            let statusMatch = false;
+            if (currentFilter === 'all') {
+                statusMatch = true;
+            } else if (currentFilter === 'active') {
+                statusMatch = status === 'active';
+            } else if (currentFilter === 'completed') {
+                statusMatch = status === 'completed';
+            } else if (currentFilter === 'overdue') {
+                statusMatch = isOverdue;
+            }
+            
+            // Check search
+            const searchMatch = currentSearch === '' || 
+                               title.includes(currentSearch) ||
+                               vehicle.includes(currentSearch) ||
+                               description.includes(currentSearch);
+            
+            const shouldShow = statusMatch && searchMatch;
+            
+            if (shouldShow) {
+                card.style.display = '';
+                card.style.animation = 'fadeInUp 0.4s ease-out';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+
+            // Count by status for stats
+            if (searchMatch) {
+                if (status === 'active') {
+                    filteredCounts.active++;
+                    if (isOverdue) {
+                        filteredCounts.overdue++;
+                    }
+                } else if (status === 'completed') {
+                    filteredCounts.completed++;
+                }
+            }
+        });
+
+        // Update filter button counts
+        updateFilterCounts(filteredCounts);
+
+        // Show empty message if no results
+        if (visibleCount === 0) {
+            showNoResults();
+        } else {
+            hideNoResults();
+        }
+    }
+
+    // ========== UPDATE FILTER COUNTS ==========
+    function updateFilterCounts(counts) {
+        filterButtons.forEach(btn => {
+            const filter = btn.dataset.filter;
+            let countValue = 0;
+
+            if (filter === 'all') {
+                countValue = counts.active + counts.completed;
+            } else if (filter === 'active') {
+                countValue = counts.active;
+            } else if (filter === 'completed') {
+                countValue = counts.completed;
+            } else if (filter === 'overdue') {
+                countValue = counts.overdue;
+            }
+            
+            // Update button text with count
+            const buttonContent = btn.innerHTML;
+            const baseText = buttonContent.split('(')[0].trim();
+            btn.innerHTML = baseText + ` (${countValue})`;
+        });
+
+        // Update stats
+        updateStats(counts);
+    }
+
+    // ========== UPDATE STATS ==========
+    function updateStats(counts) {
+        animateCountChange(document.getElementById('activeCount'), activeCount, counts.active);
+        animateCountChange(document.getElementById('completedCount'), completedCount, counts.completed);
+        animateCountChange(document.getElementById('overdueCount'), overdueCount, counts.overdue);
+    }
+
+    function animateCountChange(element, oldValue, newValue) {
+        if (!element || oldValue === newValue) return;
+        
+        let current = oldValue;
+        const step = Math.ceil((newValue - oldValue) / 10);
+        
+        const interval = setInterval(() => {
+            current += step;
+            if ((step > 0 && current >= newValue) || (step < 0 && current <= newValue)) {
+                current = newValue;
+                clearInterval(interval);
+            }
+            element.textContent = current;
+        }, 30);
+    }
+
+    // ========== SHOW/HIDE NO RESULTS ==========
+    function showNoResults() {
+        let noResultsMsg = document.getElementById('noResults');
+        if (!noResultsMsg) {
+            noResultsMsg = document.createElement('div');
+            noResultsMsg.id = 'noResults';
+            noResultsMsg.className = 'empty-state';
+            noResultsMsg.innerHTML = `
+                <div class="empty-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <h3>Nema Rezultata</h3>
+                <p>Nema podsećanja koja odgovaraju vašoj pretrazi ili filteru.</p>
+            `;
+            remindersGrid?.parentElement?.insertBefore(noResultsMsg, remindersGrid);
+        }
+        noResultsMsg.style.display = 'block';
+        if (remindersGrid) remindersGrid.style.display = 'none';
+    }
+
+    function hideNoResults() {
+        const noResultsMsg = document.getElementById('noResults');
+        if (noResultsMsg) noResultsMsg.style.display = 'none';
+        if (remindersGrid) remindersGrid.style.display = '';
+    }
+
+    // ========== VIEW DETAILS BUTTONS ==========
+    const viewDetailsButtons = document.querySelectorAll('.btn-view-details');
+    const modal = document.getElementById('reminderModal');
+    const closeModalBtn = document.getElementById('closeModal');
+    const modalBody = document.getElementById('modalBody');
+
+    viewDetailsButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const reminderCard = btn.closest('.reminder-card');
+            if (reminderCard) {
+                loadReminderDetails(reminderCard);
+            }
+        });
+    });
+
+    closeModalBtn?.addEventListener('click', () => {
+        closeModal();
+    });
+
+    modal?.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+
+    // ========== LOAD REMINDER DETAILS ==========
+    function loadReminderDetails(card) {
+        const title = card.querySelector('.reminder-title').textContent;
+        const type = Array.from(card.querySelectorAll('.type-badge'))[0]?.textContent || 'Ostalo';
+        const status = card.querySelector('.status-indicator').textContent.trim();
+        const vehicle = card.querySelector('.info-value').textContent;
+        const dueDate = card.querySelectorAll('.info-value')[1].textContent.trim();
+        const description = card.querySelector('.description-preview').textContent;
+        const isOverdue = card.getAttribute('data-overdue') === 'true';
+
+        const statusClass = card.querySelector('.status-indicator').getAttribute('data-status');
+        const statusColor = statusClass === 'active' ? 'var(--info)' : 'var(--success)';
+
+        modalBody.innerHTML = `
+            <div style="animation: fadeInUp 0.4s ease-out;">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid rgba(240, 173, 78, 0.2);">
+                    <div>
+                        <h2 style="margin: 0 0 0.5rem; color: var(--text-light); font-size: 1.5rem;">${escapeHtml(title)}</h2>
+                        <span style="display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.85rem; color: ${statusColor}; font-weight: 600;">
+                            <i class="fas fa-circle" style="font-size: 0.6rem;"></i>
+                            ${escapeHtml(status)}
+                        </span>
+                    </div>
+                </div>
+
+                <div style="display: grid; gap: 1.5rem; margin-bottom: 2rem;">
+                    <div>
+                        <span style="color: var(--primary); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; display: block; margin-bottom: 0.5rem;"><i class="fas fa-tag"></i> Tip</span>
+                        <span style="color: var(--text-light); font-size: 1rem;">${escapeHtml(type)}</span>
+                    </div>
+
+                    <div>
+                        <span style="color: var(--primary); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; display: block; margin-bottom: 0.5rem;"><i class="fas fa-car"></i> Vozilo</span>
+                        <span style="color: var(--text-light); font-size: 1rem;">${escapeHtml(vehicle)}</span>
+                    </div>
+
+                    <div>
+                        <span style="color: var(--primary); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; display: block; margin-bottom: 0.5rem;"><i class="fas fa-calendar"></i> Rok ${isOverdue ? '<span style="color: var(--danger); margin-left: 0.5rem;">(PREKORAČENO)</span>' : ''}</span>
+                        <span style="color: ${isOverdue ? 'var(--danger)' : 'var(--text-light)'}; font-size: 1rem; font-weight: ${isOverdue ? '600' : '400'};">${escapeHtml(dueDate)}</span>
+                    </div>
+
+                    <div>
+                        <span style="color: var(--primary); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; display: block; margin-bottom: 0.5rem;"><i class="fas fa-file-alt"></i> Opis</span>
+                        <span style="color: var(--text-light); font-size: 1rem; line-height: 1.6; white-space: pre-wrap; word-break: break-word;">${escapeHtml(description)}</span>
+                    </div>
+
+                    <div>
+                        <span style="color: var(--primary); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; display: block; margin-bottom: 0.75rem;"><i class="fas fa-tasks"></i> Napredak</span>
+                        <div style="background: rgba(255, 255, 255, 0.05); border-radius: 10px; overflow: hidden; border: 1px solid rgba(240, 173, 78, 0.2);">
+                            <div style="height: 12px; background: linear-gradient(90deg, var(--primary), var(--primary-dark)); width: ${escapeHtml(progress)}; transition: width 0.4s ease;"></div>
+                        </div>
+                        <span style="color: var(--primary); font-size: 0.85rem; font-weight: 600; margin-top: 0.5rem; display: block;">${escapeHtml(progress)}</span>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+                    <button class="close-modal-btn" style="padding: 0.75rem; background: transparent; color: var(--text-muted); border: 2px solid var(--text-muted); border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+                        <i class="fas fa-times"></i> Zatvori
+                    </button>
+                    <a href="edit_reminder.php?id=${escapeHtml(card.getAttribute('data-id'))}" style="padding: 0.75rem; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #111; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.3s ease;">
+                        <i class="fas fa-edit"></i> Uredi
+                    </a>
+                </div>
+            </div>
+        `;
+
+        modal?.classList.add('active');
+        
+        // Add close button event
+        document.querySelector('.close-modal-btn')?.addEventListener('click', closeModal);
+    }
+
+    function closeModal() {
+        modal?.classList.remove('active');
+    }
+
+    // ========== ESCAPE HTML ==========
+    function escapeHtml(text) {
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return text.replace(/[&<>"']/g, m => map[m]);
+    }
+
+    // ========== KEYBOARD SHORTCUTS ==========
+    document.addEventListener('keydown', (e) => {
+        // Escape = Close modal
+        if (e.key === 'Escape' && modal?.classList.contains('active')) {
+            closeModal();
+        }
+        
+        // Ctrl/Cmd + F = Focus search
+        if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+            e.preventDefault();
+            searchInput?.focus();
+        }
+    });
+
+    // ========== ANIMATE STATS ON LOAD ==========
+    const statNumbers = document.querySelectorAll('.stat-number');
+    statNumbers.forEach((stat, index) => {
+        const finalValue = parseInt(stat.textContent);
+        const delay = index * 100;
+        
+        setTimeout(() => {
+            let current = 0;
+            const step = Math.ceil(finalValue / 20);
+            
+            const interval = setInterval(() => {
+                current += step;
+                if (current >= finalValue) {
+                    current = finalValue;
+                    clearInterval(interval);
+                }
+                stat.textContent = current;
+            }, 30);
+        }, delay);
+    });
+
+    // ========== CARD ANIMATION ON LOAD ==========
+    reminderCards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.05}s`;
+    });
+
+    // ========== PREVENT ANIMATION JANK ==========
+    document.addEventListener('visibilitychange', () => {
+        const animatedBg = document.querySelector('.animated-bg');
+        
+        if (document.hidden) {
+            if (animatedBg) animatedBg.style.animationPlayState = 'paused';
+        } else {
+            if (animatedBg) animatedBg.style.animationPlayState = 'running';
+        }
+    });
+
+    // ========== MARK AS COMPLETED ==========
+    const completeButtons = document.querySelectorAll('.btn-complete');
+    
+    completeButtons.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const card = this.closest('.reminder-card');
+            const reminderId = card.getAttribute('data-id');
+            
+            if (confirm('Da li ste sigurni da želite da označite ovo podsećanje kao završeno?')) {
+                // Send AJAX request
+                fetch('../controllers/ReminderController.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'action=complete&id=' + reminderId
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update card UI
+                        card.setAttribute('data-status', 'completed');
+                        card.style.animation = 'fadeOutDown 0.4s ease-out';
+                        
+                        setTimeout(() => {
+                            card.remove();
+                            applyFiltersAndSearch();
+                            showNotification('Podsećanje je označeno kao završeno', 'success');
+                        }, 400);
+                    }
+                })
+                .catch(err => {
+                    console.error('Error:', err);
+                    showNotification('Greška pri ažuriranju podsećanja', 'error');
+                });
+            }
+        });
+    });
+
+    // ========== NOTIFICATION SYSTEM ==========
+    window.showNotification = function(message, type = 'success') {
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        
+        const icon = type === 'success' ? 'check-circle' : 'exclamation-circle';
+        notification.innerHTML = `
+            <i class="fas fa-${icon}"></i>
+            <span>${message}</span>
+        `;
+        
+        notification.style.cssText = `
+            position: fixed;
+            top: 100px;
+            right: 30px;
+            background: ${type === 'success' ? 'rgba(40, 167, 69, 0.95)' : 'rgba(220, 53, 69, 0.95)'};
+            color: #fff;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 10000;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: slideInRight 0.4s ease-out;
+            backdrop-filter: blur(10px);
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.style.animation = 'slideOutRight 0.4s ease-out';
+            setTimeout(() => notification.remove(), 400);
+        }, 3000);
+    };
+
+    // ========== CONSOLE EASTER EGG ==========
+    console.log('%c⏰ Reminders Page', 'font-size: 20px; font-weight: bold; color: #f0ad4e;');
+    console.log('%cKeyboard shortcuts:', 'color: #888; font-weight: bold;');
+    console.log('Ctrl/Cmd + F: Focus search');
+    console.log('Escape: Close modal');
+    console.log('%cTotal reminders loaded:', 'color: #28a745;', reminderCards.length);
+    console.log('%cStats:', 'color: #28a745;', {
+        active: activeCount,
+        completed: completedCount,
+        overdue: overdueCount,
+        total: reminderCards.length
+    });
+
+});
+
+// ========== PERFORMANCE OPTIMIZATION ==========
+document.addEventListener('visibilitychange', () => {
+    const animatedBg = document.querySelector('.animated-bg');
+    
+    if (document.hidden) {
+        if (animatedBg) animatedBg.style.animationPlayState = 'paused';
+    } else {
+        if (animatedBg) animatedBg.style.animationPlayState = 'running';
+    }
+});

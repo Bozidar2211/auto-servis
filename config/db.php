@@ -1,4 +1,6 @@
 <?php
+global $pdo;
+
 $host = '127.0.0.1';
 $port = '3307';
 $dbname = 'auto_servis';
@@ -11,4 +13,3 @@ try {
 } catch (PDOException $e) {
     die("Greška pri konekciji sa bazom: " . $e->getMessage());
 }
-?>
