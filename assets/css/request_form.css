@@ -106,6 +106,22 @@ display: flex;
 align-items: center;
 gap: 0.5rem;
 }
+.user-badge {
+  background: rgba(240, 173, 78, 0.1);
+  border: 1px solid rgba(240, 173, 78, 0.3);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+}
+
+.user-badge {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.8rem;
+  }
 .navbar-brand i {
 font-size: 2rem;
 animation: iconPulse 2s ease-in-out infinite;
@@ -668,13 +684,8 @@ transform: translateY(-3px);
 box-shadow: 0 5px 20px rgba(240, 173, 78, 0.2);
 }
 .urgency-option input[type="radio"]:checked + .urgency-label {
-background: currentColor;
-color: #111;
 border-color: currentColor;
 box-shadow: 0 10px 30px rgba(240, 173, 78, 0.3);
-}
-.urgency-option input[type="radio"]:checked + .urgency-label i {
-color: #111;
 }
 /* ========== FORM ACTIONS ========== */
 .form-actions {

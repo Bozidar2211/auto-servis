@@ -1,6 +1,6 @@
 <?php
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'user') {
-    header("Location: ../../login.php");
+    header("Location: /auto-servis/login.php");  // ✅ FIXED: Apsolutna putanja
     exit;
 }
 
@@ -23,7 +23,7 @@ $mechanics = array_filter($allUsers, function($u) {
     <title>Novi Servisni Zahtev | Auto Servis</title>
     
     <!-- Favicon -->
-    <link rel="icon" href="../assets/img/favicon.png" type="image/png">
+    <link rel="icon" href="/auto-servis/assets/img/favicon.png" type="image/png">
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -46,7 +46,7 @@ $mechanics = array_filter($allUsers, function($u) {
 <!-- Navigation -->
 <nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container">
-        <a class="navbar-brand" href="../index.php">
+        <a class="navbar-brand" href="/auto-servis/index.php">  <!-- ✅ FIXED -->
             <i class="fas fa-car-side"></i>
             Auto Servis
         </a>
@@ -56,21 +56,26 @@ $mechanics = array_filter($allUsers, function($u) {
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto align-items-center">
                 <li class="nav-item">
-                    <span class="nav-link">
-                        <i class="fas fa-user-circle"></i>
+                    <a class="nav-link" href="/auto-servis/views/dashboard.php">  <!-- ✅ FIXED -->
+                        <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/auto-servis/user.php?controller=request&action=myRequests">  <!-- ✅ FIXED -->
+                        <i class="fa-regular fa-envelope me-1"></i> Moji Zahtevi
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <span class="user-badge">
+                        <i class="fas fa-user"></i>
                         <?php echo htmlspecialchars($_SESSION['user']['username']); ?>
                     </span>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="dashboard.php">Dashboard</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="my_requests.php">Moji Zahtevi</a>
                 </li>
             </ul>
         </div>
     </div>
 </nav>
+
 
 <!-- Page Header -->
 <section class="page-header">

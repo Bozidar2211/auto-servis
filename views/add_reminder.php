@@ -209,7 +209,7 @@ if (!$carId) {
                                 name="note" 
                                 rows="4"
                                 required
-                                placeholder="Detaljno objasni šta treba da se uradi, где и kada..."
+                                placeholder="Detaljno objasni šta treba da se uradi, gde и kada..."
                             ></textarea>
                             <div class="form-error" id="note-error"></div>
                             <div class="form-help">Što detaljnija napomena, to je bolje</div>

@@ -1,8 +1,3 @@
-/**
- * REMINDERS PAGE JAVASCRIPT
- * Filtering, search, modals i interaktivne funkcije
- */
-
 document.addEventListener('DOMContentLoaded', () => {
 
     // ========== INITIALIZE COUNTERS ==========
@@ -300,7 +295,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const vehicle = card.querySelector('.info-value').textContent;
         const dueDate = card.querySelectorAll('.info-value')[1].textContent.trim();
         const description = card.querySelector('.description-preview').textContent;
-        const progress = card.querySelector('.progress-percent').textContent;
         const isOverdue = card.getAttribute('data-overdue') === 'true';
 
         const statusClass = card.querySelector('.status-indicator').getAttribute('data-status');

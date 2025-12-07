@@ -14,10 +14,9 @@ if (!$carId || !is_numeric($carId)) {
     exit;
 }
 
+// Povuci servise
 $services = Service::getByCar($carId);
 
-//Fallback ako nema servisa
-if (!$services || !is_array($services)) {
-    echo "Nema dostupnih servisa za ovo vozilo.";
-    exit;
-}
+// Uključi view
+require_once __DIR__ . '/../views/services.php';
+

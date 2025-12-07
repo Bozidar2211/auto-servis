@@ -34,49 +34,6 @@ document.addEventListener('DOMContentLoaded', () => {
   updateClock();
   setInterval(updateClock, 1000);
 
-  // ========== FETCH QUICK STATS (Simulated) ==========
-  // U realnoj aplikaciji, ovo bi bio AJAX call ka backend-u
-  function fetchQuickStats() {
-    // Simulirani podaci - zameni sa pravim API pozivom
-    setTimeout(() => {
-      const stats = {
-        users: 127,
-        cars: 453,
-        services: 1842,
-        revenue: '€45,320'
-      };
-
-      animateStatNumber('.stat-users .stat-mini-number', stats.users);
-      animateStatNumber('.stat-cars .stat-mini-number', stats.cars);
-      animateStatNumber('.stat-services .stat-mini-number', stats.services);
-      
-      const revenueEl = document.querySelector('.stat-revenue .stat-mini-number');
-      if (revenueEl) {
-        revenueEl.textContent = stats.revenue;
-      }
-    }, 500);
-  }
-
-  function animateStatNumber(selector, target) {
-    const element = document.querySelector(selector);
-    if (!element) return;
-
-    let start = 0;
-    const duration = 1500;
-    const increment = target / (duration / 16);
-    
-    const timer = setInterval(() => {
-      start += increment;
-      if (start >= target) {
-        element.textContent = Math.floor(target);
-        clearInterval(timer);
-      } else {
-        element.textContent = Math.floor(start);
-      }
-    }, 16);
-  }
-
-  fetchQuickStats();
 
   // ========== CARD HOVER 3D EFFECT ==========
   document.querySelectorAll('.admin-card').forEach(card => {
@@ -315,17 +272,6 @@ document.addEventListener('DOMContentLoaded', () => {
       closeCustomModal();
     }
   });
-
-  // ========== AUTO REFRESH STATS (Optional) ==========
-  const autoRefresh = false; // Set to true to enable
-  
-  if (autoRefresh) {
-    setInterval(() => {
-      if (!document.hidden) {
-        fetchQuickStats();
-      }
-    }, 30000); // Every 30 seconds
-  }
 
   // ========== SCROLL ANIMATIONS ==========
   const observerOptions = {

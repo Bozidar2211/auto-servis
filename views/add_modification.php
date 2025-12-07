@@ -4,6 +4,25 @@ if (!isset($_SESSION['user'])) {
     header('Location: login.php');
     exit;
 }
+
+require_once __DIR__ . '/../controllers/ModificationController.php';
+
+$carId = $_GET['car_id'] ?? null;
+
+if (!$carId) {
+    header('Location: dashboard.php');
+    exit;
+}
+
+// Get car details
+require_once __DIR__ . '/../models/Car.php';
+$car = Car::getById($carId);
+
+if (!$car || $car['user_id'] != $_SESSION['user']['id']) {
+    header('Location: dashboard.php');
+    exit;
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -50,7 +69,7 @@ if (!isset($_SESSION['user'])) {
                     <a class="nav-link" href="dashboard.php">Dashboard</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="modifications.php?carId=<?= $car['id'] ?>">Moje Modifikacije</a>
+                    <a class="nav-link" href="modifications.php?car_id=<?= $car['id'] ?>">Moje Modifikacije</a>
                 </li>
             </ul>
         </div>
@@ -65,7 +84,9 @@ if (!isset($_SESSION['user'])) {
                 <i class="fas fa-wrench"></i>
             </div>
             <h1 class="header-title">Dodaj Novu Modifikaciju</h1>
-            <p class="header-subtitle">Registruj modifikaciju za automobil u bazu</p>
+            <p class="header-subtitle">
+                Za automobil: <strong><?= htmlspecialchars($car['brand'] . ' ' . $car['model'] . ' (' . $car['year'] . ')') ?></strong>
+            </p>
         </div>
         
         <!-- Progress Indicator -->
@@ -89,14 +110,17 @@ if (!isset($_SESSION['user'])) {
         <div class="row justify-content-center">
             <div class="col-lg-8">
                 
-                <!-- Info Card -->
-                <div class="info-card fade-in">
+                <!-- Car Info Card -->
+                <div class="info-card fade-in" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
                     <div class="info-icon">
-                        <i class="fas fa-lightbulb"></i>
+                        <i class="fas fa-car"></i>
                     </div>
                     <div class="info-content">
-                        <h5>Savet:</h5>
-                        <p>Detaljno popunite sve podatke o modifikaciji kako bi mogli da pratite sve izmene na vašem automobilu.</p>
+                        <h5>Automobil:</h5>
+                        <p style="font-size: 1.1rem; font-weight: 600;">
+                            <?= htmlspecialchars($car['brand'] . ' ' . $car['model']) ?>
+                            <span style="opacity: 0.8; font-weight: 400;"> • Godište: <?= htmlspecialchars($car['year']) ?></span>
+                        </p>
                     </div>
                 </div>
 
@@ -109,29 +133,8 @@ if (!isset($_SESSION['user'])) {
                     
                     <form id="addModificationForm" method="POST" action="../controllers/AddModificationController.php">
                         
-                        <!-- Car Selection Group -->
-                        <div class="form-group">
-                            <label for="car_id" class="form-label">
-                                <i class="fas fa-car"></i> Izaberi Automobil
-                            </label>
-                            <div class="input-wrapper">
-                                <i class="fas fa-car-side input-icon"></i>
-                                <select class="form-control" id="car_id" name="car_id" required>
-                                    <option value="">-- Odaberi automobil --</option>
-                                    <?php
-                                    if (isset($cars) && !empty($cars)):
-                                        foreach ($cars as $car):
-                                            echo '<option value="' . htmlspecialchars($car['id']) . '">' . 
-                                                 htmlspecialchars($car['make'] . ' ' . $car['model'] . ' (' . $car['year'] . ')') . 
-                                                 '</option>';
-                                        endforeach;
-                                    endif;
-                                    ?>
-                                </select>
-                                <i class="fas fa-question-circle input-validator"></i>
-                            </div>
-                            <div class="form-error" id="car_id-error"></div>
-                        </div>
+                        <!-- Hidden Car ID Field -->
+                        <input type="hidden" name="car_id" value="<?= htmlspecialchars($carId) ?>">
 
                         <!-- Modification Type Group -->
                         <div class="form-group">
@@ -146,7 +149,7 @@ if (!isset($_SESSION['user'])) {
                                     id="mod_type" 
                                     name="mod_type" 
                                     required 
-                                    placeholder="npr. Turbo Kit, LED Svetla, Sport Sus..."
+                                    placeholder="npr. Turbo Kit, LED Svetla, Sport Suspenzija..."
                                 >
                                 <i class="fas fa-question-circle input-validator"></i>
                             </div>
@@ -287,7 +290,7 @@ if (!isset($_SESSION['user'])) {
                                     <option value="">-- Odaberi status --</option>
                                     <option value="Planirana">Planirana</option>
                                     <option value="U toku">U toku</option>
-                                    <option value="Završena">Završena</option>
+                                    <option value="Završena" selected>Završena</option>
                                 </select>
                                 <i class="fas fa-question-circle input-validator"></i>
                             </div>
@@ -361,11 +364,11 @@ if (!isset($_SESSION['user'])) {
                         </button>
                         <button type="button" class="mod-btn" data-mod="Sport Suspenzija">
                             <i class="fas fa-arrow-down"></i>
-                            Sport Suspenzija
+                            Sportska Suspenzija
                         </button>
-                        <button type="button" class="mod-btn" data-mod="Sportski Izaust">
+                        <button type="button" class="mod-btn" data-mod="Sportski Izduv">
                             <i class="fas fa-fan"></i>
-                            Sportski Izaust
+                            Sportski Izduv
                         </button>
                         <button type="button" class="mod-btn" data-mod="Kočioni Sistem">
                             <i class="fas fa-hand-paper"></i>

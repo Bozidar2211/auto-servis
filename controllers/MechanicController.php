@@ -29,11 +29,8 @@ class MechanicController {
 
     // Obrada odgovora na zahtev
     public function reply($request_id, $price, $date, $note) {
-        $this->model->replyToRequest($request_id, $price, $date, $note);
-
-        header("Location: mechanic.php?controller=mechanic&action=dashboard&reply=success");
-        exit;
-    }
+    return $this->model->replyToRequest($request_id, $price, $date, $note);
+}
 
     // Označavanje zahteva kao završenog
     public function markCompleted($request_id) {

@@ -15,20 +15,28 @@
             return $stats;
         }
 
-        public static function getCostsByUser() {
-            global $pdo;
-            $stmt = $pdo->query("
-                SELECT u.username, 
-                    COALESCE(SUM(s.cost), 0) + COALESCE(SUM(m.cost), 0) AS total_cost
-                FROM users u
-                LEFT JOIN cars c ON u.id = c.user_id
-                LEFT JOIN services s ON c.id = s.car_id
-                LEFT JOIN modifications m ON c.id = m.car_id
-                GROUP BY u.id
-                ORDER BY total_cost DESC
-            ");
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        }
+      public static function getCostsByUser() {
+    global $pdo;
+    $stmt = $pdo->query("
+        SELECT 
+            u.username,
+            u.id,
+            (
+                SELECT COALESCE(SUM(s.cost), 0)
+                FROM services s
+                JOIN cars c ON s.car_id = c.id
+                WHERE c.user_id = u.id
+            ) + (
+                SELECT COALESCE(SUM(m.total_cost), 0)
+                FROM modifications m
+                JOIN cars c ON m.car_id = c.id
+                WHERE c.user_id = u.id
+            ) AS total_cost
+        FROM users u
+        ORDER BY total_cost DESC
+    ");
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 
         public static function getTopServiceTypes() {
             global $pdo;

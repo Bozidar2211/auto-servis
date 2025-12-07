@@ -27,20 +27,27 @@ switch ($action) {
         break;
 
     case 'reply':
-        if (
-            isset($_POST['request_id']) &&
-            isset($_POST['price']) &&
-            isset($_POST['date'])
-        ) {
-            $controller->reply(
-                $_POST['request_id'],
-                $_POST['price'],
-                $_POST['date'],
-                $_POST['note'] ?? ''
-            );
-        } else {
-            echo "<div class='container mt-5'><div class='alert alert-danger'>Greška: Nedostaju obavezni podaci.</div></div>";
-        }
+    header('Content-Type: application/json; charset=utf-8');
+
+    if (isset($_POST['request_id'], $_POST['price'], $_POST['date'])) {
+        $success = $controller->reply(
+            $_POST['request_id'],
+            $_POST['price'],
+            $_POST['date'],
+            $_POST['note'] ?? ''
+        );
+
+        echo json_encode([
+            'success' => $success,
+            'message' => $success ? 'Ponuda je uspješno poslana!' : 'Greška pri slanju ponude'
+        ]);
+    } else {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Greška: Nedostaju obavezni podaci.'
+        ]);
+    }
+    exit;
         break;
 
     case 'markCompleted':

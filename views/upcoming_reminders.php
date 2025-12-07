@@ -80,10 +80,15 @@ $stats = [
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto align-items-center">
                 <li class="nav-item">
-                    <a class="nav-link" href="dashboard.php">Profil</a>
+                    <a class="nav-link" href="dashboard.php">
+                        <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="reminders.php">Svi Podsetnici</a>
+                    <span class="user-badge">
+                        <i class="fas fa-user"></i>
+                        <?php echo htmlspecialchars($_SESSION['user']['username']); ?>
+                    </span>
                 </li>
             </ul>
         </div>
@@ -235,7 +240,7 @@ $stats = [
                                 
                                 <div class="item-content">
                                     <div class="item-header">
-                                        <h3 class="item-title"><?php echo htmlspecialchars($reminder['title']); ?></h3>
+                                        <h3 class="item-title"><?php echo htmlspecialchars($reminder['id']); ?></h3>
                                         <span class="priority-badge priority-<?php echo $reminder['priority'] ?? 'medium'; ?>">
                                             <?php echo ucfirst($reminder['priority'] ?? 'medium'); ?>
                                         </span>
@@ -257,7 +262,7 @@ $stats = [
                                     </div>
                                     
                                     <p class="item-description">
-                                        <?php echo htmlspecialchars(substr($reminder['description'], 0, 100)) . (strlen($reminder['description']) > 100 ? '...' : ''); ?>
+                                        <?php echo htmlspecialchars(substr($reminder['note'], 0, 100)) . (strlen($reminder['note']) > 100 ? '...' : ''); ?>
                                     </p>
                                 </div>
                                 
@@ -298,7 +303,7 @@ $stats = [
                                 
                                 <div class="item-content">
                                     <div class="item-header">
-                                        <h3 class="item-title"><?php echo htmlspecialchars($reminder['title']); ?></h3>
+                                        <h3 class="item-title"><?php echo htmlspecialchars($reminder['id']); ?></h3>
                                         <span class="priority-badge priority-<?php echo $reminder['priority'] ?? 'medium'; ?>">
                                             <?php echo ucfirst($reminder['priority'] ?? 'medium'); ?>
                                         </span>
@@ -320,7 +325,7 @@ $stats = [
                                     </div>
                                     
                                     <p class="item-description">
-                                        <?php echo htmlspecialchars(substr($reminder['description'], 0, 100)) . (strlen($reminder['description']) > 100 ? '...' : ''); ?>
+                                        <?php echo htmlspecialchars(substr($reminder['note'], 0, 100)) . (strlen($reminder['note']) > 100 ? '...' : ''); ?>
                                     </p>
                                 </div>
                                 

@@ -7,16 +7,24 @@ if (!isset($_SESSION['user'])) {
 
 require_once __DIR__ . '/../models/Reminder.php';
 
-// Get user's reminders
-$reminders = Reminder::getByUser($_SESSION['user']['id']);
+// Get user's reminders for selected car
+// 1) Učitaj car_id iz URL-a ako postoji, i upiši u sesiju
+if (isset($_GET['car_id']) && ctype_digit($_GET['car_id'])) {
+    $_SESSION['carid'] = (int)$_GET['car_id'];
+}
 
-// Get stats
-$stats = [
-    'active' => count(array_filter($reminders, fn($r) => $r['status'] === 'active')),
-    'completed' => count(array_filter($reminders, fn($r) => $r['status'] === 'completed')),
-    'overdue' => count(array_filter($reminders, fn($r) => $r['status'] === 'active' && strtotime($r['due_date']) < time())),
-    'total' => count($reminders)
-];
+// 2) Odredi izvor car_id
+$carId = $_SESSION['carid'] ?? null;
+
+if ($carId) {
+    // Reminders za izabrani auto
+    $reminders = Reminder::getAllByCar($carId);
+} else {
+    // Fallback: svi podsetnici za korisnika
+    $reminders = Reminder::getUpcomingByUser($_SESSION['user']['id']);
+}
+
+
 ?>
 
 <!DOCTYPE html>
@@ -60,10 +68,18 @@ $stats = [
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto align-items-center">
                 <li class="nav-item">
-                    <a class="nav-link" href="dashboard.php">Profil</a>
+                    <a class="nav-link" href="dashboard.php">
+                        <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                    </a>
                 </li>
+               <a class="nav-link" href="add_reminder.php?car_id=<?php echo htmlspecialchars($carId); ?>">
+                    <i class="fa-regular fa-bell me-1"></i> Novi Podsetnik
+                </a>
                 <li class="nav-item">
-                    <a class="nav-link" href="add_reminder.php">Novo Podsećanje</a>
+                    <span class="user-badge">
+                        <i class="fas fa-user"></i>
+                        <?php echo htmlspecialchars($_SESSION['user']['username']); ?>
+                    </span>
                 </li>
             </ul>
         </div>
@@ -77,7 +93,7 @@ $stats = [
             <div class="header-icon">
                 <i class="fas fa-bell"></i>
             </div>
-            <h1 class="header-title">Podsećanja</h1>
+            <h1 class="header-title">Podsetnici</h1>
             <p class="header-subtitle">Upravljajte podacima o servisima i održavanju vašeg automobila</p>
         </div>
     </div>
@@ -87,48 +103,7 @@ $stats = [
 <section class="content-section">
     <div class="container">
         
-        <!-- Stats Section -->
-        <div class="stats-grid fade-in">
-            <div class="stat-card">
-                <div class="stat-icon active">
-                    <i class="fas fa-clock"></i>
-                </div>
-                <div class="stat-content">
-                    <div class="stat-label">Aktivna</div>
-                    <div class="stat-number" id="activeCount"><?php echo $stats['active']; ?></div>
-                </div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-icon completed">
-                    <i class="fas fa-check-circle"></i>
-                </div>
-                <div class="stat-content">
-                    <div class="stat-label">Završena</div>
-                    <div class="stat-number" id="completedCount"><?php echo $stats['completed']; ?></div>
-                </div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-icon overdue">
-                    <i class="fas fa-exclamation-circle"></i>
-                </div>
-                <div class="stat-content">
-                    <div class="stat-label">Prekoračena</div>
-                    <div class="stat-number" id="overdueCount"><?php echo $stats['overdue']; ?></div>
-                </div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-icon total">
-                    <i class="fas fa-list"></i>
-                </div>
-                <div class="stat-content">
-                    <div class="stat-label">Ukupno</div>
-                    <div class="stat-number" id="totalCount"><?php echo $stats['total']; ?></div>
-                </div>
-            </div>
-        </div>
+        
 
         <!-- Search and Filter Section -->
         <div class="search-filter-section fade-in" style="animation-delay: 0.1s;">
@@ -138,36 +113,21 @@ $stats = [
                     type="text" 
                     id="searchInput" 
                     class="search-input" 
-                    placeholder="Pretraži podsećanja po vozilu, tipu ili opisu..."
+                    placeholder="Pretraži podsetnike po vozilu, tipu ili opisu..."
                 >
                 <button id="clearSearch" class="clear-search-btn">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
 
-            <div class="filter-buttons">
-                <button class="filter-btn active" data-filter="all">
-                    <i class="fas fa-list"></i> Sva (<?php echo $stats['total']; ?>)
-                </button>
-                <button class="filter-btn" data-filter="active">
-                    <i class="fas fa-clock"></i> Aktivna (<?php echo $stats['active']; ?>)
-                </button>
-                <button class="filter-btn" data-filter="completed">
-                    <i class="fas fa-check-circle"></i> Završena (<?php echo $stats['completed']; ?>)
-                </button>
-                <button class="filter-btn" data-filter="overdue">
-                    <i class="fas fa-exclamation-circle"></i> Prekoračena (<?php echo $stats['overdue']; ?>)
-                </button>
-            </div>
         </div>
 
         <!-- Reminders Grid -->
         <div id="remindersGrid" class="reminders-grid">
             <?php foreach ($reminders as $reminder): 
-                $dueDate = new DateTime($reminder['due_date']);
+                $Date = new DateTime($reminder['reminder_date']);
                 $today = new DateTime();
-                $interval = $today->diff($dueDate);
-                $isOverdue = $today > $dueDate && $reminder['status'] === 'active';
+                $interval = $today->diff($Date);
                 $daysUntil = $interval->invert ? -$interval->days : $interval->days;
                 
                 // Determine reminder type badge
@@ -179,27 +139,11 @@ $stats = [
                     'other' => 'Ostalo'
                 ];
             ?>
-                <div class="reminder-card fade-in" data-id="<?php echo $reminder['id']; ?>" data-status="<?php echo $reminder['status']; ?>" data-overdue="<?php echo $isOverdue ? 'true' : 'false'; ?>">
+                <div class="reminder-card fade-in" data-id="<?php echo $reminder['id']; ?>"; ?>
                     
                     <!-- Card Header with Status -->
                     <div class="card-header">
-                        <div class="header-top">
-                            <div class="reminder-type">
-                                <span class="type-badge type-<?php echo $reminder['type']; ?>">
-                                    <?php echo htmlspecialchars($typeLabels[$reminder['type']] ?? 'Ostalo'); ?>
-                                </span>
-                                <?php if ($isOverdue): ?>
-                                    <span class="overdue-badge">
-                                        <i class="fas fa-exclamation-triangle"></i> Prekoračeno
-                                    </span>
-                                <?php endif; ?>
-                            </div>
-                            <button class="card-menu-btn" data-id="<?php echo $reminder['id']; ?>">
-                                <i class="fas fa-ellipsis-v"></i>
-                            </button>
-                        </div>
-                        
-                        <h3 class="reminder-title"><?php echo htmlspecialchars($reminder['title']); ?></h3>
+                        <h3 class="reminder-title"><?php echo htmlspecialchars($reminder['note']); ?></h3>
                     </div>
 
                     <!-- Card Body -->
@@ -215,57 +159,6 @@ $stats = [
                                     echo htmlspecialchars($car['brand'] . ' ' . $car['model']);
                                 ?>
                             </span>
-                        </div>
-
-                        <div class="info-item">
-                            <span class="info-label">
-                                <i class="fas fa-calendar"></i> Rok
-                            </span>
-                            <span class="info-value due-date <?php echo $isOverdue ? 'overdue' : ''; ?>">
-                                <?php echo $dueDate->format('d.m.Y'); ?>
-                                <span class="days-info <?php echo $isOverdue ? 'danger' : 'success'; ?>">
-                                    (<?php echo $isOverdue ? '-' . abs($daysUntil) . ' dana' : '+' . $daysUntil . ' dana'; ?>)
-                                </span>
-                            </span>
-                        </div>
-
-                        <div class="info-item">
-                            <span class="info-label">
-                                <i class="fas fa-file-alt"></i> Opis
-                            </span>
-                            <span class="info-value description-preview">
-                                <?php echo htmlspecialchars(substr($reminder['description'], 0, 80)) . (strlen($reminder['description']) > 80 ? '...' : ''); ?>
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- Progress Bar -->
-                    <div class="progress-section">
-                        <div class="progress-label">
-                            <span>Napredak</span>
-                            <span class="progress-percent"><?php echo htmlspecialchars($reminder['progress'] ?? 0); ?>%</span>
-                        </div>
-                        <div class="progress-bar-wrapper">
-                            <div class="progress-bar" style="width: <?php echo htmlspecialchars($reminder['progress'] ?? 0); ?>%"></div>
-                        </div>
-                    </div>
-
-                    <!-- Card Footer -->
-                    <div class="card-footer">
-                        <div class="footer-left">
-                            <span class="status-indicator" data-status="<?php echo $reminder['status']; ?>">
-                                <?php if ($reminder['status'] === 'active'): ?>
-                                    <i class="fas fa-circle"></i> Aktivno
-                                <?php else: ?>
-                                    <i class="fas fa-check"></i> Završeno
-                                <?php endif; ?>
-                            </span>
-                        </div>
-                        <div class="footer-right">
-                            <button class="btn-view-details" data-id="<?php echo $reminder['id']; ?>">
-                                <i class="fas fa-arrow-right"></i>
-                                <span>Detalji</span>
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -288,21 +181,6 @@ $stats = [
         <?php endif; ?>
     </div>
 </section>
-
-<!-- Reminder Details Modal -->
-<div id="reminderModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>Detalji Podsećanja</h2>
-            <button id="closeModal" class="modal-close">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="modal-body" id="modalBody">
-            <!-- Content loaded dynamically -->
-        </div>
-    </div>
-</div>
 
 <!-- Footer -->
 <footer class="modern-footer">

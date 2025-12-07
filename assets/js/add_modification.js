@@ -307,13 +307,12 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             
             // Validate all required fields
-            const isCarIdValid = validateCarId(carIdSelect);
             const isModTypeValid = validateModType(modTypeInput);
             const isCategoryValid = validateCategory(categorySelect);
             const isInstallationDateValid = validateInstallationDate(installationDateInput);
             const isStatusValid = validateStatus(statusSelect);
             
-            if (isCarIdValid && isModTypeValid && isCategoryValid && isInstallationDateValid && isStatusValid) {
+            if (isModTypeValid && isCategoryValid && isInstallationDateValid && isStatusValid) {
                 // Show loading state
                 const submitBtn = form.querySelector('.btn-submit');
                 submitBtn.classList.add('loading');

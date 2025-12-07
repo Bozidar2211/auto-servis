@@ -44,12 +44,6 @@ $filter = $_GET['filter'] ?? 'active';
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto align-items-center">
                 <li class="nav-item">
-                    <span class="nav-link">
-                        <i class="fas fa-user-circle"></i>
-                        <?php echo htmlspecialchars($_SESSION['user']['username']); ?>
-                    </span>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link" href="/auto-servis/views/dashboard.php">
                         <i class="fas fa-tachometer-alt"></i>
                         Dashboard
@@ -60,6 +54,12 @@ $filter = $_GET['filter'] ?? 'active';
                         <i class="fas fa-plus-circle"></i>
                         Novi Zahtev
                     </a>
+                </li>
+                <li class="nav-item">
+                    <span class="user-badge">
+                        <i class="fas fa-user"></i>
+                        <?php echo htmlspecialchars($_SESSION['user']['username']); ?>
+                    </span>
                 </li>
             </ul>
         </div>

@@ -209,7 +209,7 @@ if (!isset($_SESSION['dismissed_today_reminders'])) {
                                 <i class="fas fa-cogs"></i>
                                 <span>Mods</span>
                             </a>
-                            <a href="stats.php?car_id=<?php echo $car['id']; ?>" class="action-btn" title="Statistika">
+                            <a href="stats.php?id=<?php echo $car['id']; ?>" class="action-btn" title="Statistika">
                                 <i class="fas fa-chart-line"></i>
                                 <span>Stats</span>
                             </a>

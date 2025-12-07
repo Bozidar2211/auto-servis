@@ -57,11 +57,6 @@ if (!isset($_SESSION['user'])) {
                         <?php echo htmlspecialchars($_SESSION['user']['username']); ?>
                     </span>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="logout.php">
-                        <i class="fas fa-sign-out-alt me-1"></i>Odjava
-                    </a>
-                </li>
             </ul>
         </div>
     </div>

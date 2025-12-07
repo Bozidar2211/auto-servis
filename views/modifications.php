@@ -25,12 +25,33 @@ if (!$car || $car['user_id'] != $_SESSION['user']['id']) {
 
 // Get modifications for this car
 require_once __DIR__ . '/../models/Modification.php';
-$modifications = Modification::getByCar($carId);
+
+// Try both method names
+if (method_exists('Modification', 'getByCarId')) {
+    $modifications = Modification::getByCarId($carId);
+} elseif (method_exists('Modification', 'getByCar')) {
+    $modifications = Modification::getByCar($carId);
+} else {
+    $modifications = [];
+}
 
 // Calculate total cost
 $totalCost = 0;
+$completedMods = 0;
+$plannedMods = 0;
+
 foreach ($modifications as $mod) {
-    $totalCost += $mod['cost'];
+    // Handle both old and new column names
+    $modCost = $mod['total_cost'] ?? ($mod['cost'] ?? 0);
+    $totalCost += $modCost;
+    
+    if (isset($mod['status'])) {
+        if ($mod['status'] === 'Završena') {
+            $completedMods++;
+        } elseif ($mod['status'] === 'Planirana') {
+            $plannedMods++;
+        }
+    }
 }
 ?>
 
@@ -74,11 +95,16 @@ foreach ($modifications as $mod) {
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto align-items-center">
-                <li class="nav-item">
-                    <a class="nav-link" href="dashboard.php">Profil</a>
+                 <li class="nav-item">
+                    <a class="nav-link" href="dashboard.php">
+                        <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                    </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Modifikacije</a>
+            <li class="nav-item">
+                    <span class="user-badge">
+                        <i class="fas fa-user"></i>
+                        <?php echo htmlspecialchars($_SESSION['user']['username']); ?>
+                    </span>
                 </li>
             </ul>
         </div>
@@ -93,10 +119,39 @@ foreach ($modifications as $mod) {
                 <i class="fas fa-tools"></i>
             </div>
             <h1 class="header-title">Modifikacije Vozila</h1>
-            <p class="header-subtitle"><?php echo htmlspecialchars($car['brand'] . ' ' . $car['model']); ?></p>
+            <p class="header-subtitle">
+                <?php 
+                    // Handle both old and new column names
+                    $carBrand = $car['make'] ?? $car['brand'] ?? 'Nepoznat';
+                    $carModel = $car['model'] ?? '';
+                    $carYear = isset($car['year']) ? ' (' . $car['year'] . ')' : '';
+                    echo htmlspecialchars($carBrand . ' ' . $carModel . $carYear); 
+                ?>
+            </p>
         </div>
     </div>
 </section>
+
+<!-- Success/Error Messages -->
+<?php if (isset($_SESSION['success_message'])): ?>
+<div class="container mt-4">
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i>
+        <?= $_SESSION['success_message'] ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+</div>
+<?php unset($_SESSION['success_message']); endif; ?>
+
+<?php if (isset($_SESSION['error_message'])): ?>
+<div class="container mt-4">
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle"></i>
+        <?= $_SESSION['error_message'] ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+</div>
+<?php unset($_SESSION['error_message']); endif; ?>
 
 <!-- Main Content -->
 <section class="content-section">
@@ -130,14 +185,28 @@ foreach ($modifications as $mod) {
                     <div class="stat-value">
                         <?php 
                             if (!empty($modifications)) {
-                                $lastMod = end($modifications);
-                                echo date('d.m.Y', strtotime($lastMod['mod_date']));
+                                $lastMod = reset($modifications); // First one (newest)
+                                $lastDate = $lastMod['installation_date'] ?? $lastMod['mod_date'] ?? null;
+                                if ($lastDate) {
+                                    echo date('d.m.Y', strtotime($lastDate));
+                                } else {
+                                    echo '--';
+                                }
                             } else {
                                 echo '--';
                             }
                         ?>
                     </div>
                     <div class="stat-label">Poslednja Modifikacija</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value"><?php echo $completedMods; ?></div>
+                    <div class="stat-label">Završeno</div>
                 </div>
             </div>
         </div>
@@ -185,28 +254,113 @@ foreach ($modifications as $mod) {
             <?php else: ?>
                 <!-- Modifications List -->
                 <div class="modifications-list">
-                    <?php foreach ($modifications as $mod): ?>
-                        <div class="modification-card" data-date="<?php echo $mod['mod_date']; ?>" data-cost="<?php echo $mod['cost']; ?>">
+                    <?php foreach ($modifications as $mod): 
+                        // Handle both old and new column names
+                        $modDate = $mod['installation_date'] ?? $mod['mod_date'] ?? date('Y-m-d');
+                        $modCost = $mod['total_cost'] ?? $mod['cost'] ?? 0;
+                        $modType = $mod['mod_type'] ?? 'Modifikacija';
+                        $modDescription = $mod['description'] ?? '';
+                        $modCategory = $mod['category'] ?? null;
+                        $modStatus = $mod['status'] ?? null;
+                        $modInstallationCost = $mod['installation_cost'] ?? null;
+                        $modPartsCost = $mod['parts_cost'] ?? null;
+                        $modWarranty = $mod['warranty'] ?? null;
+                        
+                        // Status badge color
+                        $statusClass = '';
+                        $statusIcon = '';
+                        if ($modStatus === 'Završena') {
+                            $statusClass = 'badge-success';
+                            $statusIcon = 'fa-check-circle';
+                        } elseif ($modStatus === 'U toku') {
+                            $statusClass = 'badge-warning';
+                            $statusIcon = 'fa-spinner';
+                        } elseif ($modStatus === 'Planirana') {
+                            $statusClass = 'badge-info';
+                            $statusIcon = 'fa-clock';
+                        }
+                    ?>
+                        <div class="modification-card" data-date="<?php echo $modDate; ?>" data-cost="<?php echo $modCost; ?>">
                             <div class="card-header">
                                 <div class="card-title">
                                     <i class="fas fa-wrench"></i>
-                                    <span><?php echo htmlspecialchars(substr($mod['description'], 0, 50)) . (strlen($mod['description']) > 50 ? '...' : ''); ?></span>
+                                    <span><?php echo htmlspecialchars($modType); ?></span>
                                 </div>
-                                <div class="card-date">
-                                    <i class="fas fa-calendar"></i>
-                                    <?php echo date('d.m.Y', strtotime($mod['mod_date'])); ?>
+                                <div class="card-badges">
+                                    <?php if ($modStatus): ?>
+                                        <span class="status-badge <?php echo $statusClass; ?>">
+                                            <i class="fas <?php echo $statusIcon; ?>"></i>
+                                            <?php echo htmlspecialchars($modStatus); ?>
+                                        </span>
+                                    <?php endif; ?>
+                                    <?php if ($modCategory): ?>
+                                        <span class="category-badge">
+                                            <i class="fas fa-tag"></i>
+                                            <?php echo htmlspecialchars($modCategory); ?>
+                                        </span>
+                                    <?php endif; ?>
                                 </div>
                             </div>
 
                             <div class="card-body">
-                                <p class="card-description"><?php echo htmlspecialchars($mod['description']); ?></p>
+                                <?php if ($modDescription): ?>
+                                    <p class="card-description"><?php echo nl2br(htmlspecialchars($modDescription)); ?></p>
+                                <?php endif; ?>
                                 
                                 <div class="card-meta">
-                                    <div class="meta-item">
-                                        <span class="meta-label">Cena:</span>
-                                        <span class="meta-value cost-badge">
-                                            <?php echo number_format($mod['cost'], 2, ',', '.'); ?> RSD
-                                        </span>
+                                    <div class="meta-row">
+                                        <div class="meta-item">
+                                            <span class="meta-label">
+                                                <i class="fas fa-calendar"></i> Datum:
+                                            </span>
+                                            <span class="meta-value">
+                                                <?php echo date('d.m.Y', strtotime($modDate)); ?>
+                                            </span>
+                                        </div>
+                                        
+                                        <?php if ($modWarranty): ?>
+                                        <div class="meta-item">
+                                            <span class="meta-label">
+                                                <i class="fas fa-shield-alt"></i> Garantija:
+                                            </span>
+                                            <span class="meta-value">
+                                                <?php echo $modWarranty; ?> meseci
+                                            </span>
+                                        </div>
+                                        <?php endif; ?>
+                                    </div>
+                                    
+                                    <div class="cost-breakdown">
+                                        <?php if ($modInstallationCost !== null && $modInstallationCost > 0): ?>
+                                        <div class="cost-item">
+                                            <span class="cost-label">
+                                                <i class="fas fa-wrench"></i> Instalacija:
+                                            </span>
+                                            <span class="cost-value">
+                                                <?php echo number_format($modInstallationCost, 2, ',', '.'); ?> RSD
+                                            </span>
+                                        </div>
+                                        <?php endif; ?>
+                                        
+                                        <?php if ($modPartsCost !== null && $modPartsCost > 0): ?>
+                                        <div class="cost-item">
+                                            <span class="cost-label">
+                                                <i class="fas fa-box"></i> Delovi:
+                                            </span>
+                                            <span class="cost-value">
+                                                <?php echo number_format($modPartsCost, 2, ',', '.'); ?> RSD
+                                            </span>
+                                        </div>
+                                        <?php endif; ?>
+                                        
+                                        <div class="cost-item total-cost">
+                                            <span class="cost-label">
+                                                <i class="fas fa-calculator"></i> Ukupno:
+                                            </span>
+                                            <span class="cost-value cost-badge">
+                                                <?php echo number_format($modCost, 2, ',', '.'); ?> RSD
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -266,6 +420,12 @@ foreach ($modifications as $mod) {
 <!-- Custom JavaScript -->
 <script src="../assets/js/main.js"></script>
 <script src="../assets/js/modifications.js"></script>
+
+<script>
+function confirmDelete(event) {
+    return confirm('Da li ste sigurni da želite da obrišete ovu modifikaciju?');
+}
+</script>
 
 </body>
 </html>

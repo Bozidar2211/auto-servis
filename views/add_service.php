@@ -55,10 +55,20 @@ if (!$carId) {
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto align-items-center">
                 <li class="nav-item">
-                    <a class="nav-link" href="dashboard.php">Profil</a>
+                    <a class="nav-link" href="dashboard.php">
+                        <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="services.php?car_id=<?php echo htmlspecialchars($carId); ?>">Servisi</a>
+                    <a class="nav-link" href="services.php?car_id=<?php echo htmlspecialchars($carId); ?>">
+                        <i class="fa fa-wrench me-1"></i> Servisi
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <span class="user-badge">
+                        <i class="fas fa-user"></i>
+                        <?php echo htmlspecialchars($_SESSION['user']['username']); ?>
+                    </span>
                 </li>
             </ul>
         </div>
@@ -73,7 +83,7 @@ if (!$carId) {
                 <i class="fas fa-tools"></i>
             </div>
             <h1 class="header-title">Dodaj Novi Servis</h1>
-            <p class="header-subtitle">Zabeležite servis obavljanja na vašem automobilu</p>
+            <p class="header-subtitle">Zabeležite obavljene servise na vašem automobilu</p>
         </div>
         
         <!-- Progress Indicator -->

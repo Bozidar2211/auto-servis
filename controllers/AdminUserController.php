@@ -35,7 +35,7 @@ class AdminUserController {
             !empty($data['id']) && is_numeric($data['id']) &&
             !empty($data['username']) &&
             filter_var($data['email'], FILTER_VALIDATE_EMAIL) &&
-            in_array($data['role'], User::availableRoles()) // ✅ koristi sve dozvoljene role
+            in_array($data['role'], User::availableRoles()) // koristi sve dozvoljene role
         ) {
             User::update($data);
         }
