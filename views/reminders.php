@@ -173,7 +173,7 @@ if ($carId) {
                 </div>
                 <h3>Nema Podsećanja</h3>
                 <p>Još niste kreirali nijedan podsetnik. Kreirajte novo podsećanje da biste počeli.</p>
-                <a href="add_reminder.php" class="btn-create-reminder">
+                <a href="add_reminder.php?car_id=<?php echo htmlspecialchars($carId); ?>" class="btn-create-reminder">
                     <i class="fas fa-plus"></i>
                     Kreiraj Podsećanje
                 </a>

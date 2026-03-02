@@ -24,7 +24,7 @@ class AdminUserController {
             exit;
         }
 
-        // ✅ koristi helper iz modela
+        // koristi helper iz modela
         $roles = User::availableRoles();
         include __DIR__ . '/../views/admin/edit_user.php';
     }
@@ -44,17 +44,22 @@ class AdminUserController {
     }
 
     public function delete() {
-        $id = $_POST['id'] ?? null;
+    $id = $_POST['id'] ?? null;
 
-        if ($id && is_numeric($id)) {
-            $success = User::delete($id);
+    if ($id && is_numeric($id)) {
+        // prvo odveži sve automobile od korisnika
+        User::detachCars($id);
 
-            if (!$success) {
-                $_SESSION['delete_error'] = "Korisnik ne može biti obrisan jer ima povezane podatke.";
-            }
+        // zatim obriši korisnika
+        $success = User::delete($id);
+
+        if (!$success) {
+            $_SESSION['delete_error'] = "Greška: korisnik nije obrisan.";
         }
-
-        header('Location: /auto-servis/admin.php?controller=user&action=index');
-        exit;
     }
+
+    header('Location: /auto-servis/admin.php?controller=user&action=index');
+    exit;
+}
+
 }

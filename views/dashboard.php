@@ -191,10 +191,20 @@ if (!isset($_SESSION['dismissed_today_reminders'])) {
                             <div class="car-icon">
                                 <i class="fas fa-car"></i>
                             </div>
-                            <div class="car-info">
-                                <h5><?php echo htmlspecialchars($car['brand'] . ' ' . $car['model']); ?></h5>
-                                <p class="car-meta"><?php echo htmlspecialchars($car['year'] . ' • ' . $car['registration']); ?></p>
-                            </div>
+                            <div class="car-info d-flex align-items-center justify-content-between">
+                            <div>
+                <h5><?php echo htmlspecialchars($car['brand'] . ' ' . $car['model']); ?></h5>
+        <p class="car-meta"><?php echo htmlspecialchars($car['year'] . ' • ' . $car['registration']); ?></p>
+    </div>
+        <form method="POST" action="../controllers/DeleteController.php" class="ms-auto" style="display:inline;">
+            <input type="hidden" name="type" value="car">
+            <input type="hidden" name="car_id" value="<?php echo $car['id']; ?>">
+            <button type="submit" class="btn btn-sm btn-danger" title="Izbriši vozilo">
+                <i class="fas fa-trash-alt"></i>
+            </button>
+        </form>
+</div>
+
                         </div>
                         <div class="car-actions">
                             <a href="services.php?car_id=<?php echo $car['id']; ?>" class="action-btn" title="Servisi">

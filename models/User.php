@@ -68,27 +68,59 @@ class User {
         ]);
     }
 
-    public static function delete($id) {
-        if (!is_numeric($id)) {
-            return false;
-        }
-
-        global $pdo;
-
-        try {
-            $pdo->prepare("DELETE FROM services WHERE car_id IN (SELECT id FROM cars WHERE user_id = ?)")->execute([$id]);
-            $pdo->prepare("DELETE FROM reminders WHERE car_id IN (SELECT id FROM cars WHERE user_id = ?)")->execute([$id]);
-            $pdo->prepare("DELETE FROM modifications WHERE car_id IN (SELECT id FROM cars WHERE user_id = ?)")->execute([$id]);
-            $pdo->prepare("DELETE FROM requests WHERE user_id = ?")->execute([$id]);
-            $pdo->prepare("DELETE FROM requests WHERE mechanic_id = ?")->execute([$id]);
-            $pdo->prepare("DELETE FROM cars WHERE user_id = ?")->execute([$id]);
-
-            $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
-            return $stmt->execute([$id]);
-
-        } catch (PDOException $e) {
-            error_log("Greška pri brisanju korisnika: " . $e->getMessage());
-            return false;
-        }
+    // NOVA metoda: samo odvezuje automobile
+   public static function detachCars($userId) {
+    if (!is_numeric($userId)) {
+        return false;
     }
+
+    global $pdo;
+    try {
+        $stmt = $pdo->prepare("UPDATE cars SET user_id = NULL WHERE user_id = ?");
+        $stmt->execute([$userId]);
+        return $stmt->rowCount(); // broj odvezanih automobila
+    } catch (PDOException $e) {
+        error_log("Greška pri odvezivanju automobila: " . $e->getMessage());
+        return false;
+    }
+}
+
+
+    // DELETE sada samo briše usera, bez brisanja auta
+   public static function delete($id) {
+    if (!is_numeric($id)) {
+        return false;
+    }
+
+    global $pdo;
+
+    try {
+        // 1. Odveži automobile
+        $pdo->prepare("UPDATE cars SET user_id = NULL WHERE user_id = ?")->execute([$id]);
+
+        // 2. Odveži servise (ako su vezani preko car_id)
+        $pdo->prepare("UPDATE services SET car_id = NULL WHERE car_id IN (SELECT id FROM cars WHERE user_id = ?)")->execute([$id]);
+
+        // 3. Odveži podsetnike
+        $pdo->prepare("UPDATE reminders SET car_id = NULL WHERE car_id IN (SELECT id FROM cars WHERE user_id = ?)")->execute([$id]);
+
+        // 4. Odveži modifikacije
+        $pdo->prepare("UPDATE modifications SET car_id = NULL WHERE car_id IN (SELECT id FROM cars WHERE user_id = ?)")->execute([$id]);
+
+        // 5. Odveži zahteve gde je user
+        $pdo->prepare("UPDATE requests SET user_id = NULL WHERE user_id = ?")->execute([$id]);
+
+        // 6. Odveži zahteve gde je mehaničar
+        $pdo->prepare("UPDATE requests SET mechanic_id = NULL WHERE mechanic_id = ?")->execute([$id]);
+
+        // 7. Na kraju obriši korisnika
+        $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
+        return $stmt->execute([$id]);
+
+    } catch (PDOException $e) {
+        error_log("Greška pri brisanju korisnika: " . $e->getMessage());
+        return false;
+    }
+}
+
 }

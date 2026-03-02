@@ -128,70 +128,81 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ========== DELETE CONFIRMATION MODAL ==========
-  let formToSubmit = null;
+let formToSubmit = null;
 
-  document.querySelectorAll('.delete-form').forEach(form => {
-    form.addEventListener('submit', function(e) {
-      e.preventDefault();
-      formToSubmit = this;
-      
-      const username = this.closest('.user-card').querySelector('.user-card-name').textContent;
-      showConfirmModal(username);
-    });
-  });
+document.querySelectorAll('.delete-form').forEach(form => {
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    formToSubmit = this;
 
-  function showConfirmModal(username) {
-    const overlay = document.getElementById('confirmOverlay');
-    const modal = overlay.querySelector('.confirm-modal');
-    const message = modal.querySelector('p');
-    
-    if (message) {
-      message.textContent = `Da li ste sigurni da želite da obrišete korisnika "${username}"? Ova akcija je nepovratna.`;
+    // pokušaj da nađe username, ako postoji u DOM-u
+    let username = '';
+    const usernameEl = this.closest('.user-card')?.querySelector('.user-card-name');
+    if (usernameEl) {
+      username = usernameEl.textContent.trim();
     }
-    
-    overlay.classList.add('active');
-    setTimeout(() => modal.classList.add('active'), 10);
+
+    showConfirmModal(username);
+  });
+});
+
+function showConfirmModal(username) {
+  const overlay = document.getElementById('confirmOverlay');
+  const modal = overlay.querySelector('.confirm-modal');
+  const message = document.getElementById('confirmMessage');
+
+  if (message) {
+    if (username) {
+      message.textContent = `Da li ste sigurni da želite da obrišete korisnika "${username}"? Ova akcija je nepovratna.`;
+    } else {
+      message.textContent = `Da li ste sigurni da želite da obrišete ovog korisnika? Ova akcija je nepovratna.`;
+    }
   }
 
-  window.closeConfirmModal = function() {
-    const overlay = document.getElementById('confirmOverlay');
-    const modal = overlay.querySelector('.confirm-modal');
-    
-    modal.classList.remove('active');
-    setTimeout(() => {
-      overlay.classList.remove('active');
-      formToSubmit = null;
-    }, 300);
-  };
+  overlay.classList.add('active');
+  setTimeout(() => modal.classList.add('active'), 10);
+}
 
-  const confirmDeleteBtn = document.getElementById('confirmDelete');
-  if (confirmDeleteBtn) {
-    confirmDeleteBtn.addEventListener('click', function() {
-      if (formToSubmit) {
-        // Add loading state
-        this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Brisanje...';
-        this.disabled = true;
-        
-        // Show notification
-        showNotification('Brisanje u toku...', 'info');
-        
-        // Submit after animation
-        setTimeout(() => {
-          formToSubmit.submit();
-        }, 500);
-      }
-    });
-  }
+window.closeConfirmModal = function() {
+  const overlay = document.getElementById('confirmOverlay');
+  const modal = overlay.querySelector('.confirm-modal');
 
-  // Close modal on overlay click
-  const confirmOverlay = document.getElementById('confirmOverlay');
-  if (confirmOverlay) {
-    confirmOverlay.addEventListener('click', function(e) {
-      if (e.target === this) {
-        closeConfirmModal();
-      }
-    });
-  }
+  modal.classList.remove('active');
+  setTimeout(() => {
+    overlay.classList.remove('active');
+    formToSubmit = null;
+  }, 300);
+};
+
+
+const confirmDeleteBtn = document.getElementById('confirmDelete');
+if (confirmDeleteBtn) {
+  confirmDeleteBtn.addEventListener('click', function() {
+    if (formToSubmit) {
+      // loading state
+      this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Brisanje...';
+      this.disabled = true;
+
+      // ako nemaš showNotification, izbaci ovu liniju
+      // showNotification('Brisanje u toku...', 'info');
+
+      setTimeout(() => {
+        formToSubmit.submit();
+      }, 500);
+    }
+  });
+}
+
+// zatvaranje modala klikom na overlay
+const confirmOverlay = document.getElementById('confirmOverlay');
+if (confirmOverlay) {
+  confirmOverlay.addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeConfirmModal();
+    }
+  });
+}
+
 
   // ========== RIPPLE EFFECT ON BUTTONS ==========
   document.querySelectorAll('.btn-user-action, .btn-action, .btn-refresh, .btn-filter, .btn-export').forEach(button => {

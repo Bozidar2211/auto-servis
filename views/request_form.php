@@ -1,6 +1,6 @@
 <?php
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'user') {
-    header("Location: /auto-servis/login.php");  // ✅ FIXED: Apsolutna putanja
+    header("Location: /auto-servis/login.php");  
     exit;
 }
 
@@ -46,7 +46,7 @@ $mechanics = array_filter($allUsers, function($u) {
 <!-- Navigation -->
 <nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container">
-        <a class="navbar-brand" href="/auto-servis/index.php">  <!-- ✅ FIXED -->
+        <a class="navbar-brand" href="/auto-servis/index.php">  
             <i class="fas fa-car-side"></i>
             Auto Servis
         </a>
@@ -56,12 +56,12 @@ $mechanics = array_filter($allUsers, function($u) {
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto align-items-center">
                 <li class="nav-item">
-                    <a class="nav-link" href="/auto-servis/views/dashboard.php">  <!-- ✅ FIXED -->
+                    <a class="nav-link" href="/auto-servis/views/dashboard.php">  
                         <i class="fas fa-tachometer-alt me-1"></i>Dashboard
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/auto-servis/user.php?controller=request&action=myRequests">  <!-- ✅ FIXED -->
+                    <a class="nav-link" href="/auto-servis/user.php?controller=request&action=myRequests">  
                         <i class="fa-regular fa-envelope me-1"></i> Moji Zahtevi
                     </a>
                 </li>

@@ -181,7 +181,7 @@ $stats = [
                                 
                                 <div class="item-content">
                                     <div class="item-header">
-                                        <h3 class="item-title"><?php echo htmlspecialchars($reminder['title']); ?></h3>
+                                        <h3 class="item-title"><?php echo htmlspecialchars($reminder['id']); ?></h3>
                                         <span class="priority-badge priority-<?php echo $reminder['priority'] ?? 'medium'; ?>">
                                             <?php echo ucfirst($reminder['priority'] ?? 'medium'); ?>
                                         </span>
@@ -199,7 +199,7 @@ $stats = [
                                     </div>
                                     
                                     <p class="item-description">
-                                        <?php echo htmlspecialchars(substr($reminder['description'], 0, 100)) . (strlen($reminder['description']) > 100 ? '...' : ''); ?>
+                                        <?php echo htmlspecialchars(substr($reminder['note'], 0, 100)) . (strlen($reminder['note']) > 100 ? '...' : ''); ?>
                                     </p>
                                 </div>
                                 
