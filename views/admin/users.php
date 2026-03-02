@@ -202,12 +202,11 @@ $users = $users ?? [];
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                             <form method="POST" 
-                                                  action="/auto-servis/admin.php?controller=user&action=delete" 
-                                                  class="d-inline" 
-                                                  onsubmit="return confirmDelete('<?php echo htmlspecialchars($u['username']); ?>');">
+                                                action="/auto-servis/admin.php?controller=user&action=delete" 
+                                                class="d-inline delete-form">
                                                 <input type="hidden" name="id" value="<?php echo $u['id']; ?>">
                                                 <button type="submit" 
-                                                        class="btn-action-table btn-delete" 
+                                                class="btn-action-table btn-delete" 
                                                         title="Obriši korisnika">
                                                     <i class="fas fa-trash-alt"></i>
                                                 </button>
@@ -231,23 +230,23 @@ $users = $users ?? [];
     </footer>
 
     <!-- Confirmation Modal -->
-    <div class="confirm-overlay" id="confirmOverlay">
-        <div class="confirm-modal">
-            <div class="confirm-icon">
-                <i class="fas fa-exclamation-triangle"></i>
-            </div>
-            <h5>Potvrda Brisanja</h5>
-            <p id="confirmMessage">Da li ste sigurni da želite da obrišete ovog korisnika?</p>
-            <div class="confirm-actions">
-                <button class="btn-cancel" onclick="cancelDelete()">Otkaži</button>
-                <button class="btn-confirm" onclick="proceedDelete()">Obriši</button>
-            </div>
+<div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-modal">
+        <div class="confirm-icon">
+            <i class="fas fa-exclamation-triangle"></i>
         </div>
+        <h5>Potvrda Brisanja</h5>
+        <p id="confirmMessage">Da li ste sigurni da želite da obrišete ovog korisnika?</p>
+        <div class="confirm-actions"> 
+            <button class="btn-cancel" onclick="closeConfirmModal()">Otkaži</button> 
+            <button id="confirmDelete" class="btn-confirm">Obriši</button> </div>
     </div>
+</div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/auto-servis/assets/js/main.js"></script>
     <script src="/auto-servis/assets/js/admin.js"></script>
+    <script src="/auto-servis/assets/js/users.js"></script>
     <script>
         // Confirmation Dialog
         let pendingForm = null;

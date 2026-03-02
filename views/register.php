@@ -109,7 +109,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <h2>Dobrodošli</h2>
                             <p>Registrujte novi nalog</p>
                         </div>
-<form method="POST" action="../controllers/AuthController.php" class="auth-form">
+<form method="POST" action="../controllers/RegisterController.php" class="auth-form">
         <div class="form-group">
             <label for="username" class="form-label">Korisničko ime:</label>
             <input type="text" name="username" id="username" class="form-control" placeholder="username" required>
