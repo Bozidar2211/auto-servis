@@ -23,22 +23,36 @@ switch ($type) {
     case 'service':
         $date = $_POST['service_date'] ?? '';
         $desc = trim($_POST['description'] ?? '');
-        $mileage = $_POST['mileage'] ?? '';
-        $cost = $_POST['cost'] ?? '';
+        $mileage = $_POST['mileage'] ?? 0;
+        $cost = $_POST['cost'] ?? 0;
 
-        //Validacija servisa
+        //Validacija servisa - BEZ service_type_id
         if (
             empty($date) || empty($desc) ||
-            !is_numeric($mileage) || $mileage < 0 ||
             !is_numeric($cost) || $cost < 0
         ) {
-            echo "Neispravni podaci za servis.";
+            $_SESSION['error'] = "Neispravni podaci za servis.";
+            header("Location: ../views/edit_service.php?id=$id");
             exit;
         }
 
-        $stmt = $pdo->prepare("UPDATE services SET service_date = ?, description = ?, mileage = ?, cost = ? WHERE id = ?");
-        $stmt->execute([$date, $desc, $mileage, $cost, $id]);
-        header("Location: ../views/services.php?car_id=$carId");
+        // Mileage je opciono, ali ako postoji mora biti validan
+        if (!empty($mileage) && (!is_numeric($mileage) || $mileage < 0)) {
+            $_SESSION['error'] = "Kilometraža mora biti validan pozitivan broj.";
+            header("Location: ../views/edit_service.php?id=$id");
+            exit;
+        }
+
+        try {
+            $stmt = $pdo->prepare("UPDATE services SET service_date = ?, description = ?, mileage = ?, cost = ? WHERE id = ?");
+            $stmt->execute([$date, $desc, $mileage, $cost, $id]);
+            $_SESSION['success'] = "Servis je uspešno ažuriran!";
+            header("Location: ../views/services.php?car_id=$carId");
+        } catch (PDOException $e) {
+            error_log("Greška pri ažuriranju servisa: " . $e->getMessage());
+            $_SESSION['error'] = "Greška pri ažuriranju servisa.";
+            header("Location: ../views/edit_service.php?id=$id");
+        }
         break;
 
     case 'modification':
@@ -79,3 +93,4 @@ switch ($type) {
         echo "Nepoznat tip izmene.";
 }
 exit;
+?>
