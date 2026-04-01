@@ -36,5 +36,18 @@ class RequestController {
         header("Location: /auto-servis/user.php?controller=request&action=myRequests&scheduled=1");
         exit;
     }
+
+    public function decline($requestId, $userId) {
+        $request = $this->model->getRequestById($requestId);
+        if ($request && $request['user_id'] == $userId) {
+            $this->model->updateStatus($requestId, 'declined');
+                header("Location: user.php?controller=request&action=myRequests");
+            exit;
+            
+        } else {
+        echo "<div class='container mt-5'><div class='alert alert-danger'>Zahtev nije pronađen ili ne pripada ovom korisniku.</div></div>";
+    }
+}
+
 }
 

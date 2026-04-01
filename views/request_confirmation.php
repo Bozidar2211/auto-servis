@@ -128,7 +128,7 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'user') {
 
                 <!-- Action Buttons -->
                 <div class="action-buttons">
-                    <a href="/auto-servis/views/my_requests.php" class="btn btn-primary">
+                    <a href="/auto-servis/user.php?controller=request&action=myRequests" class="btn btn-primary">
                         <i class="fas fa-list"></i>
                         Moji Zahtevi
                     </a>
