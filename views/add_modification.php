@@ -300,7 +300,7 @@ if (!$car || $car['user_id'] != $_SESSION['user']['id']) {
                         <!-- Warranty Group -->
                         <div class="form-group">
                             <label for="warranty" class="form-label">
-                                <i class="fas fa-shield-alt"></i> Garantija (meseci)
+                                <i class="fas fa-shield-alt"></i> Garancija (meseci)
                             </label>
                             <div class="input-wrapper">
                                 <i class="fas fa-hourglass-end input-icon"></i>

@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ========== FORM ELEMENTS ==========
     const form = document.getElementById('editServiceForm');
-    const serviceTypeSelect = document.getElementById('service_type_id');
+    const serviceTypeSelect = document.getElementById('service_type_id'); // MOŽE BITI NULL
     const serviceDateInput = document.getElementById('service_date');
     const descriptionTextarea = document.getElementById('description');
     const costInput = document.getElementById('cost');
@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ========== REAL-TIME VALIDATION ==========
     
-    // Service Type validation
+    // Service Type validation - SAMO AKO POSTOJI
     if (serviceTypeSelect) {
         serviceTypeSelect.addEventListener('change', function() {
             validateServiceType(this);
@@ -98,6 +98,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // ========== VALIDATION FUNCTIONS ==========
     
     function validateServiceType(select) {
+        // AKO POLJE NE POSTOJI, VRATI TRUE
+        if (!select) return true;
+        
         const value = select.value.trim();
         const errorDiv = document.getElementById('service_type_id-error');
         
@@ -261,8 +264,8 @@ document.addEventListener('DOMContentLoaded', () => {
         form.addEventListener('submit', function(e) {
             e.preventDefault();
             
-            // Validate all required fields
-            const isTypeValid = validateServiceType(serviceTypeSelect);
+            // Validate all required fields - SERVICE TYPE JE OPCIONO
+            const isTypeValid = serviceTypeSelect ? validateServiceType(serviceTypeSelect) : true;
             const isDateValid = validateServiceDate(serviceDateInput);
             const isDescriptionValid = validateDescription(descriptionTextarea);
             const isCostValid = validateCost(costInput);

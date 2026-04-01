@@ -22,11 +22,6 @@ if (!$car || $car['user_id'] != $_SESSION['user']['id']) {
     header('Location: dashboard.php');
     exit;
 }
-
-// Get all service types for dropdown
-require_once __DIR__ . '/../models/Service.php';
-$serviceTypes = Service::getByCar($service['car_id']);
-
 ?>
 
 <!DOCTYPE html>
@@ -148,35 +143,6 @@ $serviceTypes = Service::getByCar($service['car_id']);
                             </div>
                         </div>
 
-                        <!-- Service Type Group -->
-                        <div class="form-group">
-                            <label for="service_type_id" class="form-label">
-                                <i class="fas fa-list"></i> Tip Servisa
-                            </label>
-                            <div class="input-wrapper select-wrapper">
-                                <i class="fas fa-tools input-icon"></i>
-                                <select 
-                                    class="form-control" 
-                                    id="service_type_id" 
-                                    name="service_type_id" 
-                                    required
-                                >
-                                    <option value="">Izaberite tip servisa...</option>
-                                    <?php foreach ($serviceTypes as $type): ?>
-                                        <option 
-                                            value="<?php echo $type['id']; ?>"
-                                            <?php echo ($service['service_type_id'] == $type['id']) ? 'selected' : ''; ?>
-                                        >
-                                            <?php echo htmlspecialchars($type['name']); ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                                <i class="fas fa-question-circle input-validator"></i>
-                            </div>
-                            <div class="form-error" id="service_type_id-error"></div>
-                            <div class="form-help">Odaberite tip obavljenog servisa</div>
-                        </div>
-
                         <!-- Service Date Group -->
                         <div class="form-group">
                             <label for="service_date" class="form-label">
@@ -215,6 +181,29 @@ $serviceTypes = Service::getByCar($service['car_id']);
                             <div class="form-help">Detaljno napišite šta je obavljeno tijekom servisa</div>
                         </div>
 
+                        <!-- Mileage Group -->
+                        <div class="form-group">
+                            <label for="mileage" class="form-label">
+                                <i class="fas fa-tachometer-alt"></i> Kilometraža
+                            </label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-road input-icon"></i>
+                                <input 
+                                    type="number" 
+                                    class="form-control" 
+                                    id="mileage" 
+                                    name="mileage" 
+                                    min="0"
+                                    value="<?php echo htmlspecialchars($service['mileage'] ?? 0); ?>"
+                                    required
+                                    placeholder="npr. 50000"
+                                >
+                                <i class="fas fa-question-circle input-validator"></i>
+                            </div>
+                            <div class="form-error" id="mileage-error"></div>
+                            <div class="form-help">Kilometraža vozila prilikom servisa</div>
+                        </div>
+
                         <!-- Cost Group -->
                         <div class="form-group">
                             <label for="cost" class="form-label">
@@ -251,7 +240,14 @@ $serviceTypes = Service::getByCar($service['car_id']);
                             </div>
                             <div class="info-item">
                                 <span class="label">Dani Od Servisa:</span>
-                                <span class="value days-ago" id="daysAgo">--</span>
+                                <span class="value days-ago" id="daysAgo">
+                                    <?php 
+                                    $serviceDate = new DateTime($service['service_date']);
+                                    $today = new DateTime();
+                                    $diff = $today->diff($serviceDate);
+                                    echo $diff->days . ' dana';
+                                    ?>
+                                </span>
                             </div>
                         </div>
 
@@ -277,7 +273,7 @@ $serviceTypes = Service::getByCar($service['car_id']);
                         Opasne Akcije
                     </h5>
                     <p>Ako više ne trebate ovaj servis, možete ga obrisati.</p>
-                    <form method="POST" action="../controllers/DeleteController.php" onsubmit="return confirm('Da li ste sigurni? Ova akcija se ne može poništiti!');">
+                    <form method="POST" action="../controllers/DeleteController.php" onsubmit="return confirm('Da li ste sigurni da želite da obrišete ovaj servis? Ova akcija se ne može poništiti!');">
                         <input type="hidden" name="type" value="service">
                         <input type="hidden" name="id" value="<?php echo htmlspecialchars($service['id']); ?>">
                         <input type="hidden" name="car_id" value="<?php echo htmlspecialchars($car['id']); ?>">
@@ -308,6 +304,37 @@ $serviceTypes = Service::getByCar($service['car_id']);
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <!-- Custom JavaScript -->
+<script>
+    // Original cost za kalkulaciju razlike
+    const originalCost = <?php echo $service['cost']; ?>;
+    
+    // Calculate price difference in real-time
+    const costInput = document.getElementById('cost');
+    const priceDiffElement = document.getElementById('priceDiff');
+    
+    if (costInput && priceDiffElement) {
+        costInput.addEventListener('input', function() {
+            const newCost = parseFloat(this.value) || 0;
+            const diff = newCost - originalCost;
+            
+            const diffFormatted = Math.abs(diff).toLocaleString('sr-RS', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }) + ' RSD';
+            
+            if (diff > 0) {
+                priceDiffElement.textContent = '+' + diffFormatted;
+                priceDiffElement.style.color = '#dc3545'; // Red for increase
+            } else if (diff < 0) {
+                priceDiffElement.textContent = '-' + diffFormatted;
+                priceDiffElement.style.color = '#28a745'; // Green for decrease
+            } else {
+                priceDiffElement.textContent = '0.00 RSD';
+                priceDiffElement.style.color = 'var(--text-muted)';
+            }
+        });
+    }
+</script>
 <script src="../assets/js/main.js"></script>
 <script src="../assets/js/edit_service.js"></script>
 
