@@ -64,4 +64,11 @@ class RequestModel {
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
 
+public function updateStatus($requestId, $status) {
+    $stmt = $this->conn->prepare("UPDATE requests SET status = ? WHERE id = ?");
+    return $stmt->execute([$status, $requestId]);
+}
+
+
+
 }

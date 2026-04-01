@@ -52,9 +52,17 @@ if ($controller === 'request') {
             $requestController->confirmation();
             break;
 
-        default:
+        case 'decline':
+            if (isset($_GET['id'])) {
+            $requestController->decline($_GET['id'], $_SESSION['user']['id']);
+            } else {
+                echo "<div class='container mt-5'><div class='alert alert-danger'>Nedostaje ID zahteva.</div></div>";
+            }
+            break;
+
+            default:
             echo "<div class='container mt-5'><div class='alert alert-warning'>Nepoznata akcija: <strong>" . htmlspecialchars($action) . "</strong></div></div>";
-    }
+            }
 
 // Kontroler za dodavanje servisa iz zahteva
 } elseif ($controller === 'service') {
